@@ -24,6 +24,7 @@ const fontFamily = url.searchParams.get('font') || 'open-sans';
 const showWhen = url.searchParams.get('when') !== '0';
 const showDescription = url.searchParams.get('desc') !== '0';
 const startToday = url.searchParams.get('starttoday') === '1';
+const timezone = url.searchParams.get('tz') || 'America/Los_Angeles';
 
 // Convert hex color to RGB for use in rgba()
 function hexToRgb(hex) {
@@ -53,8 +54,23 @@ if (fontFamily === 'fuzzy-bubbles') {
 	document.body.classList.add('font-crimson-text');
 }
 
-let today = new Date();
-today.setHours(0, 0, 0, 0);
+// Get today's date in the specified timezone
+function getTodayInTimezone(tz) {
+	const formatter = new Intl.DateTimeFormat('en-US', {
+		timeZone: tz,
+		year: 'numeric',
+		month: '2-digit',
+		day: '2-digit'
+	});
+	const parts = formatter.formatToParts(new Date());
+	const year = parts.find(p => p.type === 'year').value;
+	const month = parts.find(p => p.type === 'month').value;
+	const day = parts.find(p => p.type === 'day').value;
+	const date = new Date(`${year}-${month}-${day}T00:00:00`);
+	return date;
+}
+
+let today = getTodayInTimezone(timezone);
 let selectedDay = new Date(today.valueOf());
 let selectedView = default_view;
 

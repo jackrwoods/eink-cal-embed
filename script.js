@@ -11,6 +11,7 @@ const show_description_field = document.getElementById('show_description');
 const monday_start_field = document.getElementById('monday_start');
 const start_today_field = document.getElementById('start_today');
 const default_view_field = document.getElementById('default_view');
+const timezone_field = document.getElementById('timezone');
 const font_family_field = document.getElementById('font_family');
 const min_hour_field = document.getElementById('min_hour');
 const max_hour_field = document.getElementById('max_hour');
@@ -35,6 +36,7 @@ let show_description = 1;
 let monday_start = 0;
 let start_today = 0;
 let default_view = 0;
+let timezone = 'America/Los_Angeles';
 let font_family = 'open-sans';
 let min_hour = '';
 let max_hour = '';
@@ -50,7 +52,8 @@ function refresh() {
 	let fontParam = font_family !== 'open-sans' ? `&font=${encodeURIComponent(font_family)}` : '';
 	let whenParam = show_when === 0 ? `&when=${show_when}` : '';
 	let descParam = show_description === 0 ? `&desc=${show_description}` : '';
-	let embed = `${document.URL.substr(0, document.URL.lastIndexOf('/'))}/iframe.html?ical=${encodeURIComponent(ical)}&title=${show_title}&nav=${show_nav}&date=${show_date}&view=${show_view}&details=${show_details}&monstart=${monday_start}&starttoday=${start_today}&dview=${default_view}&color=${encodeURIComponent(color)}&colorbg=${encodeURIComponent(colorbg)}&colortxt=${encodeURIComponent(colortxt)}&colorsecondarytxt=${encodeURIComponent(colorsecondarytxt)}${minHourParam}${maxHourParam}${fontParam}${whenParam}${descParam}`;
+	let timezoneParam = timezone !== 'America/Los_Angeles' ? `&tz=${encodeURIComponent(timezone)}` : '';
+	let embed = `${document.URL.substr(0, document.URL.lastIndexOf('/'))}/iframe.html?ical=${encodeURIComponent(ical)}&title=${show_title}&nav=${show_nav}&date=${show_date}&view=${show_view}&details=${show_details}&monstart=${monday_start}&starttoday=${start_today}&dview=${default_view}&color=${encodeURIComponent(color)}&colorbg=${encodeURIComponent(colorbg)}&colortxt=${encodeURIComponent(colortxt)}&colorsecondarytxt=${encodeURIComponent(colorsecondarytxt)}${minHourParam}${maxHourParam}${fontParam}${whenParam}${descParam}${timezoneParam}`;
 	embed_field.value = embed;
 	iframe.src = embed;
 }
@@ -137,6 +140,11 @@ colorsectxt_field.addEventListener('change', () => {
 
 default_view_field.addEventListener('change', () => {
 	default_view = default_view_field.value;
+	refresh();
+});
+
+timezone_field.addEventListener('change', () => {
+	timezone = timezone_field.value;
 	refresh();
 });
 
