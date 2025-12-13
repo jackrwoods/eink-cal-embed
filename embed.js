@@ -215,6 +215,9 @@ function renderWeek(events) {
 			td.className = 'week-hour';
 			td.dataset.date = getHumanDate(d);
 			td.dataset.hour = hour;
+			if (getHumanDate(d) === getHumanDate(today)) {
+				td.dataset.today = 'true';
+			}
 
 			let dayStr = getHumanDate(d);
 
@@ -283,9 +286,14 @@ function renderWeek(events) {
 		halfHourLabel.innerHTML = '';
 		halfRow.appendChild(halfHourLabel);
 		for (let i = 0; i < 7; i++) {
+			let d = new Date(weekStart.valueOf());
+			d.setDate(weekStart.getDate() + i);
 			let td = document.createElement('td');
 			td.className = 'week-half';
 			td.innerHTML = '';
+			if (getHumanDate(d) === getHumanDate(today)) {
+				td.dataset.today = 'true';
+			}
 			halfRow.appendChild(td);
 		}
 		tbody.appendChild(halfRow);

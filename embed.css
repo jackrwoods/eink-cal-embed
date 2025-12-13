@@ -52,11 +52,19 @@ body {
 	background: #fff;
 }
 
+#week .week-hour[data-today="true"] {
+	background: rgba(var(--theme-color-rgb), 0.08);
+}
+
 #week .week-half {
 	border-top: 1px dotted #e0e0e0;
 	border-bottom: none;
 	min-height: 16px;
 	background: #fafafa;
+}
+
+#week .week-half[data-today="true"] {
+	background: rgba(var(--theme-color-rgb), 0.12);
 }
 
 #week th {
