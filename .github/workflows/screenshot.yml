@@ -35,6 +35,10 @@ jobs:
         if: steps.check-file.outputs.exists == 'true'
         run: npm install puppeteer
 
+      - name: Install Chrome
+        if: steps.check-file.outputs.exists == 'true'
+        run: npx puppeteer browsers install chrome
+
       - name: Generate screenshot
         if: steps.check-file.outputs.exists == 'true'
         run: |
