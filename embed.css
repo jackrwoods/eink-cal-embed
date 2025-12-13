@@ -4,7 +4,7 @@
 	max-width: 60px;
 	text-align: right;
 	font-size: 0.95em;
-	color: #888;
+	color: var(--text-color);
 	padding-right: 8px;
 	background: #f7f7f7;
 	border: none;
@@ -62,7 +62,7 @@ body {
 #week th {
 	border: 0;
 	text-align: center;
-	color: var(--dark-gray);
+	color: var(--text-color);
 	font-weight: bold;
 	height: 1px;
 	font-size: 1em;
@@ -72,7 +72,7 @@ body {
 
 #week .date {
 	display: block;
-	color: var(--dark-gray);
+	color: var(--text-color);
 	font-size: 1.1em;
 	margin-top: 2px;
 }
