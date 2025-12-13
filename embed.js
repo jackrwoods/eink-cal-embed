@@ -14,10 +14,43 @@ const show_details = url.searchParams.get('details') || 0;
 const show_view = url.searchParams.get('view') || 2;
 const default_view = url.searchParams.get('dview') || 2;
 const monday_start = url.searchParams.get('monstart') || 0;
-const color = url.searchParams.get('color') || '#1A73E8';
-const colorBG = url.searchParams.get('colorbg') || '#FFFFFF';
-const colorText = url.searchParams.get('colortxt') || '#000000';
+const min_hour = url.searchParams.get('minhour');
+const max_hour = url.searchParams.get('maxhour');
+const color = url.searchParams.get('color') || '#8B6F47';
+const colorBG = url.searchParams.get('colorbg') || '#FEFEF8';
+const colorText = url.searchParams.get('colortxt') || '#3E3E3E';
 const colorThemeText = url.searchParams.get('colorsecondarytxt') || '#FFFFFF';
+const fontFamily = url.searchParams.get('font') || 'open-sans';
+const showWhen = url.searchParams.get('when') !== '0';
+const showDescription = url.searchParams.get('desc') !== '0';
+
+// Convert hex color to RGB for use in rgba()
+function hexToRgb(hex) {
+	const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+	return result ? `${parseInt(result[1], 16)}, ${parseInt(result[2], 16)}, ${parseInt(result[3], 16)}` : '0, 0, 0';
+}
+
+// Truncate text to max 128 characters
+function truncateText(text, maxLength = 128) {
+	if (text && text.length > maxLength) {
+		return text.substring(0, maxLength) + '…';
+	}
+	return text;
+}
+
+// Set CSS variables for theme colors
+document.documentElement.style.setProperty('--background-color', colorBG);
+document.documentElement.style.setProperty('--text-color', colorText);
+document.documentElement.style.setProperty('--theme-color', color);
+document.documentElement.style.setProperty('--theme-text-color', colorThemeText);
+document.documentElement.style.setProperty('--theme-color-rgb', hexToRgb(color));
+
+// Apply font family
+if (fontFamily === 'fuzzy-bubbles') {
+	document.body.classList.add('font-fuzzy-bubbles');
+} else if (fontFamily === 'crimson-text') {
+	document.body.classList.add('font-crimson-text');
+}
 
 let today = new Date();
 today.setHours(0, 0, 0, 0);
@@ -99,6 +132,40 @@ function renderWeek(events) {
 	let monday = new Date(baseDay.valueOf());
 	monday.setDate(baseDay.getDate() - ((dayOfWeek + 6) % 7));
 
+	// Find min and max hours with events in the week
+	let hoursWithEvents = new Set();
+	for (let i = 0; i < 7; i++) {
+		let d = new Date(monday.valueOf());
+		d.setDate(monday.getDate() + i);
+		let dayStr = getHumanDate(d);
+		let dayHasAllDay = events.some(e => getHumanDate(e.startDate) === dayStr && e.allDay);
+		events.forEach(e => {
+			if (getHumanDate(e.startDate) === dayStr && !e.allDay) {
+				hoursWithEvents.add(e.startDate.getHours());
+			}
+		});
+	}
+
+	// Determine hours to show: use URL params if provided, otherwise auto-detect from events
+	let hoursToShow;
+	if (min_hour !== null && max_hour !== null) {
+		// User specified both min and max
+		let minH = parseInt(min_hour);
+		let maxH = parseInt(max_hour);
+		hoursToShow = Array.from({length: maxH - minH + 1}, (_, i) => minH + i);
+	} else if (min_hour !== null) {
+		// User specified only min, go to 8pm
+		let minH = parseInt(min_hour);
+		hoursToShow = Array.from({length: 20 - minH}, (_, i) => minH + i);
+	} else if (max_hour !== null) {
+		// User specified only max, go from 8am
+		let maxH = parseInt(max_hour);
+		hoursToShow = Array.from({length: maxH - 8 + 1}, (_, i) => 8 + i);
+	} else {
+		// Auto-detect from events
+		hoursToShow = hoursWithEvents.size > 0 ? Array.from(hoursWithEvents).sort((a, b) => a - b) : Array.from({length: 12}, (_, i) => i + 8);
+	}
+
 	// Build header row (Hour label + Mon-Sun)
 	let header = document.createElement('tr');
 	// Empty top-left cell for hour labels
@@ -119,9 +186,11 @@ function renderWeek(events) {
 		header.appendChild(th);
 	}
 
-	// Build time grid (8am-8pm)
+	// Build time grid - only show hours with events (or default range if empty)
 	let tbody = document.createElement('tbody');
-	for (let hour = 8; hour < 20; hour++) {
+	let hoursToRender = hoursToShow;
+
+	for (let hour of hoursToRender) {
 		// Full hour row
 		let row = document.createElement('tr');
 		// Hour label cell
@@ -130,6 +199,7 @@ function renderWeek(events) {
 		let hourText = (hour === 12 ? '12pm' : hour === 0 ? '12am' : hour < 12 ? hour + 'am' : (hour - 12) + 'pm');
 		hourLabel.innerText = hourText;
 		row.appendChild(hourLabel);
+
 		for (let i = 0; i < 7; i++) {
 			let d = new Date(monday.valueOf());
 			d.setDate(monday.getDate() + i);
@@ -137,35 +207,62 @@ function renderWeek(events) {
 			td.className = 'week-hour';
 			td.dataset.date = getHumanDate(d);
 			td.dataset.hour = hour;
-			// Events for this hour
-			let dayEvents = events.filter(e => getHumanDate(e.startDate) === getHumanDate(d) && e.startDate.getHours() === hour);
-			for (let e = 0; e < dayEvents.length; e++) {
+
+			let dayStr = getHumanDate(d);
+
+			// Separate all-day and timed events
+			let timedEvents = events.filter(e => dayStr === getHumanDate(e.startDate) && !e.allDay && e.startDate.getHours() === hour);
+			let allDayEvents = events.filter(e => dayStr === getHumanDate(e.startDate) && e.allDay);
+
+			// Render all-day events as semi-transparent background
+			if (allDayEvents.length > 0 && hour === hoursToRender[0]) {
+				// Only show all-day events in the first hour row of the day
+				for (let e = 0; e < allDayEvents.length; e++) {
+					let event = document.createElement('div');
+					event.className = 'event event-allday';
+					let summary = document.createElement('div');
+					summary.className = 'summary';
+					let eName = document.createElement('span');
+					eName.className = 'name';
+					eName.appendChild(document.createTextNode(truncateText(allDayEvents[e].name)));
+					summary.appendChild(eName);
+					event.appendChild(summary);
+					event.appendChild(eventDetails(allDayEvents[e]));
+					td.appendChild(event);
+				}
+			}
+
+			// Render timed events on top
+			for (let e = 0; e < timedEvents.length; e++) {
 				let event = document.createElement('div');
 				event.className = 'event';
 				let summary = document.createElement('div');
 				summary.className = 'summary';
 				let eName = document.createElement('span');
 				eName.className = 'name';
-				eName.appendChild(document.createTextNode(dayEvents[e].name));
+				eName.appendChild(document.createTextNode(truncateText(timedEvents[e].name)));
 				summary.appendChild(eName);
-				let startTime = `${(dayEvents[e].startDate.getHours() % 12) || 12}:${dayEvents[e].startDate.getMinutes().toString().padStart(2, '0')}`;
-				let endTime = `${(dayEvents[e].endDate.getHours() % 12) || 12}:${dayEvents[e].endDate.getMinutes().toString().padStart(2, '0')}`;
-				let startM = ampm(dayEvents[e].startDate.getHours());
-				let endM = ampm(dayEvents[e].endDate.getHours());
-				let eTime = document.createElement('span');
-				eTime.className = 'time';
-				let timeText = `${startTime} ${startM == endM ? '' : startM} - ${endTime} ${endM}`;
-				if (dayEvents[e].days === 0) {
-					timeText = `${startTime} ${startM}`;
-				} else if (dayEvents[e].days > 1 && !dayEvents[e].allDay) {
-					timeText = `${MONTHS[dayEvents[e].startDate.getMonth()]} ${dayEvents[e].startDate.getDate()}, ${startTime}${startM} - ${MONTHS[dayEvents[e].endDate.getMonth()]} ${dayEvents[e].endDate.getDate()}, ${endTime}${endM}`;
+				if (showWhen) {
+					let startTime = `${(timedEvents[e].startDate.getHours() % 12) || 12}:${timedEvents[e].startDate.getMinutes().toString().padStart(2, '0')}`;
+					let endTime = `${(timedEvents[e].endDate.getHours() % 12) || 12}:${timedEvents[e].endDate.getMinutes().toString().padStart(2, '0')}`;
+					let startM = ampm(timedEvents[e].startDate.getHours());
+					let endM = ampm(timedEvents[e].endDate.getHours());
+					let eTime = document.createElement('span');
+					eTime.className = 'time';
+					let timeText = `${startTime} ${startM == endM ? '' : startM} - ${endTime} ${endM}`;
+					if (timedEvents[e].days === 0) {
+						timeText = `${startTime} ${startM}`;
+					} else if (timedEvents[e].days > 1 && !timedEvents[e].allDay) {
+						timeText = `${MONTHS[timedEvents[e].startDate.getMonth()]} ${timedEvents[e].startDate.getDate()}, ${startTime}${startM} - ${MONTHS[timedEvents[e].endDate.getMonth()]} ${timedEvents[e].endDate.getDate()}, ${endTime}${endM}`;
+					}
+					eTime.appendChild(document.createTextNode(timeText));
+					summary.appendChild(eTime);
 				}
-				eTime.appendChild(document.createTextNode(timeText));
-				summary.appendChild(eTime);
 				event.appendChild(summary);
-				event.appendChild(eventDetails(dayEvents[e]));
+				event.appendChild(eventDetails(timedEvents[e]));
 				td.appendChild(event);
 			}
+
 			row.appendChild(td);
 		}
 		tbody.appendChild(row);
@@ -203,27 +300,29 @@ function eventDetails(event) {
 	let eDetails = document.createElement('div');
 	eDetails.className = 'details';
 
-	let whenLabel = document.createElement('strong');
-	whenLabel.appendChild(document.createTextNode('When: '));
-	let when = document.createElement('span');
-	when.className = 'when';
-	let whenText = `${DAYS_OF_WEEK[event.startDate.getDay()].substring(0, 3)}, ${MONTHS[event.startDate.getMonth()]} ${event.startDate.getDate()}, ${startTime}${startM} - ${endTime}${endM}`;
-	if (event.days == 1 && event.allDay) {
-		whenText = `${DAYS_OF_WEEK[event.startDate.getDay()]}, ${MONTHS[event.startDate.getMonth()].substring(0, 3)} ${event.startDate.getDate()}, ${event.startDate.getFullYear()}`;
-	} else if (event.days % 1 == 0 && event.allDay) {
-		let newEnd = new Date(event.endDate.valueOf());
-		newEnd.setDate(newEnd.getDate() - 1);
-		whenText = `${MONTHS[event.startDate.getMonth()].substring(0, 3)} ${event.startDate.getDate()} - ${MONTHS[newEnd.getMonth()].substring(0, 3)} ${newEnd.getDate()}, ${event.startDate.getFullYear()}`;
-	} else if (event.days > 1) {
-		whenText = `${MONTHS[event.startDate.getMonth()]} ${event.startDate.getDate()}, ${startTime}${startM} - ${MONTHS[event.endDate.getMonth()]} ${event.endDate.getDate()}, ${endTime}${endM}`;
+	// Show "when" section if enabled
+	if (showWhen) {
+		let when = document.createElement('span');
+		when.className = 'when';
+		let whenText = `${DAYS_OF_WEEK[event.startDate.getDay()].substring(0, 3)}, ${MONTHS[event.startDate.getMonth()]} ${event.startDate.getDate()}, ${startTime}${startM} - ${endTime}${endM}`;
+		if (event.days == 1 && event.allDay) {
+			whenText = `${DAYS_OF_WEEK[event.startDate.getDay()]}, ${MONTHS[event.startDate.getMonth()].substring(0, 3)} ${event.startDate.getDate()}, ${event.startDate.getFullYear()}`;
+		} else if (event.days % 1 == 0 && event.allDay) {
+			let newEnd = new Date(event.endDate.valueOf());
+			newEnd.setDate(newEnd.getDate() - 1);
+			whenText = `${MONTHS[event.startDate.getMonth()].substring(0, 3)} ${event.startDate.getDate()} - ${MONTHS[newEnd.getMonth()].substring(0, 3)} ${newEnd.getDate()}, ${event.startDate.getFullYear()}`;
+		} else if (event.days > 1) {
+			whenText = `${MONTHS[event.startDate.getMonth()]} ${event.startDate.getDate()}, ${startTime}${startM} - ${MONTHS[event.endDate.getMonth()]} ${event.endDate.getDate()}, ${endTime}${endM}`;
+		}
+
+		when.appendChild(document.createTextNode(whenText));
+		eDetails.appendChild(when);
 	}
 
-	when.appendChild(document.createTextNode(whenText));
-	eDetails.appendChild(whenLabel);
-	eDetails.appendChild(when);
-
 	if (typeof event.location === 'string' && event.location !== '') {
-		eDetails.appendChild(document.createElement('br'));
+		if (showWhen) {
+			eDetails.appendChild(document.createElement('br'));
+		}
 		let whereLabel = document.createElement('strong');
 		whereLabel.appendChild(document.createTextNode('Where: '));
 		let where = document.createElement('span');
@@ -240,14 +339,14 @@ function eventDetails(event) {
 		eDetails.appendChild(where);
 	}
 
-	if (event.description != '') {
-		eDetails.appendChild(document.createElement('br'));
-		let descLabel = document.createElement('strong');
-		descLabel.appendChild(document.createTextNode('Description: '));
+	// Show "description" section if enabled
+	if (showDescription && event.description != '') {
+		if (showWhen || (typeof event.location === 'string' && event.location !== '')) {
+			eDetails.appendChild(document.createElement('br'));
+		}
 		let desc = document.createElement('span');
 		desc.className = 'description';
 		desc.innerHTML = event.description;
-		eDetails.appendChild(descLabel);
 		eDetails.appendChild(desc);
 	}
 
@@ -335,7 +434,7 @@ function renderAgenda(events) {
 
 		let eName = document.createElement('span');
 		eName.className = 'name';
-		eName.appendChild(document.createTextNode(events[i].name));
+		eName.appendChild(document.createTextNode(truncateText(events[i].name)));
 		summary.appendChild(eName);
 
 		let startTime = `${(events[i].startDate.getHours() % 12) || 12}:${events[i].startDate.getMinutes() < 10 ? '0' : ''}${events[i].startDate.getMinutes()}`;
@@ -343,7 +442,7 @@ function renderAgenda(events) {
 		let startM = ampm(events[i].startDate.getHours());
 		let endM = ampm(events[i].endDate.getHours());
 
-		if (!events[i].allDay) {
+		if (!events[i].allDay && showWhen) {
 			let eTime = document.createElement('span');
 			eTime.className = 'time';
 			let timeText = `${startTime} ${startM == endM ? '' : startM} - ${endTime} ${endM}`;
@@ -564,14 +663,27 @@ function renderCalendar(meta, events) {
 }
 
 function parseCalendar(data) {
-	let jCal = ICAL.parse(data);
-	let comp = new ICAL.Component(jCal);
+	try {
+		// Check if data looks like JSON error response from CORS proxy
+		if (data.trim().startsWith('{')) {
+			try {
+				const jsonData = JSON.parse(data);
+				if (jsonData.error) {
+					throw new Error(`CORS Proxy Error (${jsonData.error.code}): ${jsonData.error.message}`);
+				}
+			} catch (e) {
+				// Not valid JSON or no error field, continue with calendar parsing
+			}
+		}
 
-	const meta = {
-		calname: comp.getFirstPropertyValue('x-wr-calname'),
-		timezone: new ICAL.Timezone(comp.getFirstSubcomponent('vtimezone')).tzid,
-		caldesc: comp.getFirstPropertyValue('x-wr-caldesc')
-	};
+		let jCal = ICAL.parse(data);
+		let comp = new ICAL.Component(jCal);
+
+		const meta = {
+			calname: comp.getFirstPropertyValue('x-wr-calname'),
+			timezone: new ICAL.Timezone(comp.getFirstSubcomponent('vtimezone')).tzid,
+			caldesc: comp.getFirstPropertyValue('x-wr-caldesc')
+		};
 
 	let eventData = comp.getAllSubcomponents('vevent');
 	let events = [];
@@ -618,6 +730,15 @@ function parseCalendar(data) {
 		}
 	}
 	renderCalendar(meta, events);
+	} catch (e) {
+		console.error('Calendar parsing error:', e);
+		loading.innerHTML = `Error parsing calendar: ${e.message}<br><br>
+			<strong>Common causes:</strong><br>
+			- CORS proxy blocked the request<br>
+			- Calendar URL is invalid or inaccessible<br>
+			- Calendar data is corrupted or in wrong format<br><br>
+			Try using a different CORS proxy or a direct calendar URL.`;
+	}
 }
 
 if (ical) {
@@ -627,7 +748,7 @@ if (ical) {
 		});
 	}).catch((e) => {
 		console.error(e);
-		loading.innerHTML = "Error: iCal URL doesn't exist or isn't valid<br><br>iCal links (like those from Google calendar) will need to use a cors proxy";
+		loading.innerHTML = "Error: iCal URL doesn't exist or isn't valid<br><br>Common causes:<br>- CORS proxy blocked the request<br>- Calendar URL is unreachable<br>- Network connectivity issue";
 	});
 } else {
 	loading.innerHTML = "Error: no iCal URL provided";

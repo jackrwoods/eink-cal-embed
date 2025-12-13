@@ -50,8 +50,19 @@
 			<input type="checkbox" id="show_details">
 			<label for="show_details">Always show details</label><br>
 
+			<input type="checkbox" checked id="show_when">
+			<label for="show_when">Show event time</label><br>
+
+			<input type="checkbox" checked id="show_description">
+			<label for="show_description">Show event description</label><br>
+
 			<input type="checkbox" id="monday_start">
 			<label for="monday_start">Start week on Monday</label><br><br>
+
+			<label for="min_hour">Min hour (week view)</label><br>
+			<input type="number" id="min_hour" min="0" max="23" value=""><br>
+			<label for="max_hour">Max hour (week view)</label><br>
+			<input type="number" id="max_hour" min="0" max="23" value=""><br><br>
 
 			<label for="default_view">Default view</label><br>
 			<select id="default_view">
@@ -60,12 +71,31 @@
 				<option value="2" selected>Week</option>
 			</select><br><br>
 
+			<label for="font_family">Font</label><br>
+			<select id="font_family">
+				<option value="open-sans" selected>Open Sans</option>
+				<option value="fuzzy-bubbles">Fuzzy Bubbles</option>
+				<option value="crimson-text">Crimson Text</option>
+			</select><br><br>
+
+			<label>Theme Palette</label><br>
+			<div id="palette_selector" style="display: flex; gap: 8px; margin-bottom: 15px; flex-wrap: wrap;">
+				<button type="button" class="palette-btn" data-palette="earthy" style="background: #8B6F47;" title="Earthy" data-colors='{"color":"#8B6F47","colorsecondarytxt":"#FFFFFF","colorbg":"#FEFEF8","colortxt":"#3E3E3E"}'>Earthy</button>
+				<button type="button" class="palette-btn" data-palette="ocean" style="background: #1E5A96;" title="Ocean" data-colors='{"color":"#1E5A96","colorsecondarytxt":"#FFFFFF","colorbg":"#F0F4F8","colortxt":"#2C3E50"}'>Ocean</button>
+				<button type="button" class="palette-btn" data-palette="forest" style="background: #2D5016;" title="Forest" data-colors='{"color":"#2D5016","colorsecondarytxt":"#FFFFFF","colorbg":"#F5F9F2","colortxt":"#1F3A1F"}'>Forest</button>
+				<button type="button" class="palette-btn" data-palette="sunset" style="background: #D97634;" title="Sunset" data-colors='{"color":"#D97634","colorsecondarytxt":"#FFFFFF","colorbg":"#FEF9F4","colortxt":"#5C4033"}'>Sunset</button>
+				<button type="button" class="palette-btn" data-palette="lavender" style="background: #7B68BE;" title="Lavender" data-colors='{"color":"#7B68BE","colorsecondarytxt":"#FFFFFF","colorbg":"#F8F5FC","colortxt":"#3D2E5F"}'>Lavender</button>
+				<button type="button" class="palette-btn" data-palette="sage" style="background: #6B8E6F;" title="Sage" data-colors='{"color":"#6B8E6F","colorsecondarytxt":"#FFFFFF","colorbg":"#F7FAF8","colortxt":"#2E4033"}'>Sage</button>
+				<button type="button" class="palette-btn" data-palette="slate" style="background: #4A5568;" title="Slate" data-colors='{"color":"#4A5568","colorsecondarytxt":"#FFFFFF","colorbg":"#F5F7FA","colortxt":"#2D3748"}'>Slate</button>
+				<button type="button" class="palette-btn" data-palette="rose" style="background: #B85D75;" title="Rose" data-colors='{"color":"#B85D75","colorsecondarytxt":"#FFFFFF","colorbg":"#FEF7FA","colortxt":"#5A3A47"}'>Rose</button>
+			</div>
+
 			<label for="colorbg">Background color</label><br>
-			<input id="colorbg" type="color" value="#FFFFFF"><br>
+			<input id="colorbg" type="color" value="#FEFEF8"><br>
 			<label for="colortxt">Text color</label><br>
-			<input id="colortxt" type="color" value="#000000"><br>
+			<input id="colortxt" type="color" value="#3E3E3E"><br>
 			<label for="color">Theme color</label><br>
-			<input id="color" type="color" value="#1A73E8"><br>
+			<input id="color" type="color" value="#8B6F47"><br>
 			<label for="colorsecondarytxt">Theme text color</label><br>
 			<input id="colorsecondarytxt" type="color" value="#FFFFFF"><br>
 		</div>

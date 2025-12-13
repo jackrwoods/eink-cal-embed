@@ -114,24 +114,39 @@ body {
 
 #week .event {
 	display: block;
-	white-space: nowrap;
+	white-space: normal;
+	word-break: break-word;
 	cursor: pointer;
 	user-select: none;
-	font-size: .9em;
+	font-size: .75em;
 	background-color: var(--theme-color);
 	color: var(--theme-text-color);
-	margin: 2px 0;
+	margin: 1px 0;
 	box-sizing: border-box;
-	padding: 2px 4px;
+	padding: 1px 2px;
 	border-radius: 3px;
+	overflow: hidden;
+	position: relative;
+	z-index: 2;
+}
+
+#week .event-allday {
+	background-color: rgba(var(--theme-color-rgb), 0.15);
+	color: var(--text-color);
+	margin: 0;
+	padding: 2px;
+	font-weight: bold;
+	z-index: 1;
+	position: relative;
 }
 
 :root {
-	--background-color: #FFF;
+	--background-color: #FEFEF8;
 	--dark-gray: #777;
 	--border-color: #AAA;
-	--text-color: #000;
-	--theme-color: #1A73E8;
+	--text-color: #3E3E3E;
+	--theme-color: #8B6F47;
+	--theme-color-rgb: 139, 111, 71;
 	--theme-text-color: #FFF;
 }
 
@@ -139,8 +154,17 @@ body {
 	margin: 0;
 	background-color: var(--background-color);
 	color: var(--text-color);
-	font-family: sans-serif;
+	font-family: "Open Sans", sans-serif;
 	min-height: 100vh;
+}
+
+/* Font options */
+body.font-fuzzy-bubbles {
+	font-family: "Fuzzy Bubbles", sans-serif;
+}
+
+body.font-crimson-text {
+	font-family: "Crimson Text", serif;
 }
 
 #loading {
@@ -156,10 +180,24 @@ body {
 	align-items: center;
 	justify-content: center;
 	text-align: center;
+	padding: 20px;
+	box-sizing: border-box;
 }
 
 #loading.done {
 	display: none;
+}
+
+#loading strong {
+	color: var(--text-color);
+	display: block;
+	margin-top: 10px;
+	font-size: 0.9em;
+}
+
+#loading br {
+	display: block;
+	content: '';
 }
 
 #top {
