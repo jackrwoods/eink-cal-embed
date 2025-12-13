@@ -188,6 +188,13 @@ body.font-crimson-text {
 	display: none;
 }
 
+#loading:not(.done) ~ #top,
+#loading:not(.done) ~ #agenda,
+#loading:not(.done) ~ #month,
+#loading:not(.done) ~ #week {
+	display: none;
+}
+
 #loading strong {
 	color: var(--text-color);
 	display: block;
