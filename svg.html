@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Calendar SVG Export</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1">
+	<link rel="stylesheet" href="embed.css" />
+	<style>
+		body {
+			background: white;
+		}
+		#embed-wrapper {
+			width: 800px;
+			height: 480px;
+		}
+		#svg-container {
+			display: none;
+		}
+	</style>
+</head>
+<body>
+	<div id="embed-wrapper">
+		<span id="loading"></span>
+		<div id="top"></div>
+		<table id="agenda"></table>
+		<table id="month"></table>
+		<table id="week"></table>
+		<div id="monthDetails" style="display: none;">
+			<div class="dialog">
+				<button type="button" id="btn_close" title="Close details" onclick="this.parentElement.parentElement.classList.remove('shown')"><svg viewBox="0 0 24 24">
+					<path fill="currentColor" d="M19,6.41L17.59,5L12,10.59L6.41,5L5,6.41L10.59,12L5,17.59L6.41,19L12,13.41L17.59,19L19,17.59L13.41,12L19,6.41Z" />
+				</svg></button>
+				<span class="summary"></span>
+				<div class="details"></div>
+			</div>
+		</div>
+	</div>
+
+	<div id="svg-container"></div>
+
+	<script src="ical.min.js"></script>
+	<script src="embed.js"></script>
+	<script>
+		// Wait for calendar to load, then export as SVG
+		const originalRenderCalendar = window.renderCalendar;
+		window.renderCalendar = function(meta, events) {
+			// Call original render
+			originalRenderCalendar.call(this, meta, events);
+
+			// Once rendered, wait a moment for DOM to settle, then export
+			setTimeout(() => {
+				exportToSVG();
+			}, 500);
+		};
+
+		function exportToSVG() {
+			const wrapper = document.getElementById('embed-wrapper');
+
+			// Create SVG element
+			const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+			svg.setAttribute('width', '800');
+			svg.setAttribute('height', '480');
+			svg.setAttribute('viewBox', '0 0 800 480');
+			svg.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+
+			// Create background
+			const bg = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+			bg.setAttribute('width', '800');
+			bg.setAttribute('height', '480');
+			bg.setAttribute('fill', getComputedStyle(document.documentElement).getPropertyValue('--background-color').trim());
+			svg.appendChild(bg);
+
+			// Create a foreign object to embed HTML content
+			const foreignObject = document.createElementNS('http://www.w3.org/2000/svg', 'foreignObject');
+			foreignObject.setAttribute('width', '800');
+			foreignObject.setAttribute('height', '480');
+			foreignObject.setAttribute('x', '0');
+			foreignObject.setAttribute('y', '0');
+
+			// Clone the wrapper and add it to foreign object
+			const clonedWrapper = wrapper.cloneNode(true);
+			clonedWrapper.id = 'svg-embed-wrapper';
+			clonedWrapper.style.width = '800px';
+			clonedWrapper.style.height = '480px';
+			clonedWrapper.style.margin = '0';
+			clonedWrapper.style.overflow = 'hidden';
+
+			// Create a div to hold the content with proper styling
+			const div = document.createElementNS('http://www.w3.org/1999/xhtml', 'div');
+			div.appendChild(clonedWrapper);
+
+			foreignObject.appendChild(div);
+			svg.appendChild(foreignObject);
+
+			// Convert to string and download
+			const svgString = new XMLSerializer().serializeToString(svg);
+			const blob = new Blob([svgString], { type: 'image/svg+xml' });
+			const url = URL.createObjectURL(blob);
+
+			// Create download link
+			const link = document.createElement('a');
+			link.href = url;
+			link.download = 'calendar.svg';
+			document.body.appendChild(link);
+			link.click();
+			document.body.removeChild(link);
+			URL.revokeObjectURL(url);
+		}
+	</script>
+</body>
+</html>
