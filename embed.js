@@ -11,8 +11,8 @@ let show_title = url.searchParams.get('title') || 1;
 const show_nav = url.searchParams.get('nav') || 1;
 const show_date = url.searchParams.get('date') || 1;
 const show_details = url.searchParams.get('details') || 0;
-const show_view = url.searchParams.get('view') || 1;
-const default_view = url.searchParams.get('dview') || 0;
+const show_view = url.searchParams.get('view') || 2;
+const default_view = url.searchParams.get('dview') || 2;
 const monday_start = url.searchParams.get('monstart') || 0;
 const color = url.searchParams.get('color') || '#1A73E8';
 const colorBG = url.searchParams.get('colorbg') || '#FFFFFF';
@@ -20,12 +20,12 @@ const colorText = url.searchParams.get('colortxt') || '#000000';
 const colorThemeText = url.searchParams.get('colorsecondarytxt') || '#FFFFFF';
 
 let today = new Date();
-today.setHours(0,0,0,0);
+today.setHours(0, 0, 0, 0);
 let selectedDay = new Date(today.valueOf());
 let selectedView = default_view;
 
 function getHumanDate(date) {
-	return `${date.getFullYear()}-${(date.getMonth()+1).toString().padStart(2,0)}-${date.getDate().toString().padStart(2,0)}`;
+	return `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, 0)}-${date.getDate().toString().padStart(2, 0)}`;
 }
 
 function createDateCell(date, todayd = false) {
@@ -43,7 +43,7 @@ function createDateCell(date, todayd = false) {
 	}
 	let dayEl = document.createElement('span');
 	dayEl.className = 'dayname';
-	dayEl.appendChild(document.createTextNode(DAYS_OF_WEEK[day].substring(0,3).toUpperCase()));
+	dayEl.appendChild(document.createTextNode(DAYS_OF_WEEK[day].substring(0, 3).toUpperCase()));
 	dateCell.appendChild(dayEl);
 	let dateEl = document.createElement('span');
 	dateEl.className = 'day';
@@ -53,7 +53,7 @@ function createDateCell(date, todayd = false) {
 	dateCell.appendChild(dateEl);
 	let monthEl = document.createElement('span');
 	monthEl.className = 'month';
-	monthEl.appendChild(document.createTextNode(MONTHS[month].substring(0,3).toUpperCase()));
+	monthEl.appendChild(document.createTextNode(MONTHS[month].substring(0, 3).toUpperCase()));
 	dateCell.appendChild(monthEl);
 	return dateCell;
 }
@@ -79,13 +79,119 @@ function selectDay(date, focus = true, events = null) {
 
 function setView(newView, events) {
 	selectedView = newView;
+	document.getElementById('agenda').classList.add('hidden');
+	document.getElementById('month').classList.add('hidden');
+	document.getElementById('week').classList.add('hidden');
 	if (selectedView == 1) {
 		renderMonth(events);
-		document.getElementById('agenda').classList.add('hidden');
+	} else if (selectedView == 2) {
+		renderWeek(events);
 	} else {
 		renderAgenda(events);
-		document.getElementById('month').classList.add('hidden');
 	}
+}
+
+function renderWeek(events) {
+	// Find the Monday of the current week
+	let weekEl = document.getElementById('week');
+	let baseDay = new Date(selectedDay.valueOf());
+	let dayOfWeek = baseDay.getDay();
+	let monday = new Date(baseDay.valueOf());
+	monday.setDate(baseDay.getDate() - ((dayOfWeek + 6) % 7));
+
+	// Build header row (Hour label + Mon-Sun)
+	let header = document.createElement('tr');
+	// Empty top-left cell for hour labels
+	let emptyTh = document.createElement('th');
+	emptyTh.className = 'week-hour-label';
+	header.appendChild(emptyTh);
+	for (let i = 0; i < 7; i++) {
+		let d = new Date(monday.valueOf());
+		d.setDate(monday.getDate() + i);
+		let th = document.createElement('th');
+		th.innerText = DAYS_OF_WEEK[(i + 1) % 7].substring(0, 3); // Mon, Tue, ...
+		let dateSpan = document.createElement('span');
+		dateSpan.className = 'date';
+		dateSpan.innerText = d.getDate();
+		if (getHumanDate(d) === getHumanDate(today)) dateSpan.classList.add('today');
+		th.appendChild(document.createElement('br'));
+		th.appendChild(dateSpan);
+		header.appendChild(th);
+	}
+
+	// Build time grid (8am-8pm)
+	let tbody = document.createElement('tbody');
+	for (let hour = 8; hour < 20; hour++) {
+		// Full hour row
+		let row = document.createElement('tr');
+		// Hour label cell
+		let hourLabel = document.createElement('td');
+		hourLabel.className = 'week-hour-label';
+		let hourText = (hour === 12 ? '12pm' : hour === 0 ? '12am' : hour < 12 ? hour + 'am' : (hour - 12) + 'pm');
+		hourLabel.innerText = hourText;
+		row.appendChild(hourLabel);
+		for (let i = 0; i < 7; i++) {
+			let d = new Date(monday.valueOf());
+			d.setDate(monday.getDate() + i);
+			let td = document.createElement('td');
+			td.className = 'week-hour';
+			td.dataset.date = getHumanDate(d);
+			td.dataset.hour = hour;
+			// Events for this hour
+			let dayEvents = events.filter(e => getHumanDate(e.startDate) === getHumanDate(d) && e.startDate.getHours() === hour);
+			for (let e = 0; e < dayEvents.length; e++) {
+				let event = document.createElement('div');
+				event.className = 'event';
+				let summary = document.createElement('div');
+				summary.className = 'summary';
+				let eName = document.createElement('span');
+				eName.className = 'name';
+				eName.appendChild(document.createTextNode(dayEvents[e].name));
+				summary.appendChild(eName);
+				let startTime = `${(dayEvents[e].startDate.getHours() % 12) || 12}:${dayEvents[e].startDate.getMinutes().toString().padStart(2, '0')}`;
+				let endTime = `${(dayEvents[e].endDate.getHours() % 12) || 12}:${dayEvents[e].endDate.getMinutes().toString().padStart(2, '0')}`;
+				let startM = ampm(dayEvents[e].startDate.getHours());
+				let endM = ampm(dayEvents[e].endDate.getHours());
+				let eTime = document.createElement('span');
+				eTime.className = 'time';
+				let timeText = `${startTime} ${startM == endM ? '' : startM} - ${endTime} ${endM}`;
+				if (dayEvents[e].days === 0) {
+					timeText = `${startTime} ${startM}`;
+				} else if (dayEvents[e].days > 1 && !dayEvents[e].allDay) {
+					timeText = `${MONTHS[dayEvents[e].startDate.getMonth()]} ${dayEvents[e].startDate.getDate()}, ${startTime}${startM} - ${MONTHS[dayEvents[e].endDate.getMonth()]} ${dayEvents[e].endDate.getDate()}, ${endTime}${endM}`;
+				}
+				eTime.appendChild(document.createTextNode(timeText));
+				summary.appendChild(eTime);
+				event.appendChild(summary);
+				event.appendChild(eventDetails(dayEvents[e]));
+				td.appendChild(event);
+			}
+			row.appendChild(td);
+		}
+		tbody.appendChild(row);
+
+		// Half-hour row (dotted)
+		let halfRow = document.createElement('tr');
+		// Empty cell for half-hour label
+		let halfHourLabel = document.createElement('td');
+		halfHourLabel.className = 'week-half-label';
+		halfHourLabel.innerHTML = '';
+		halfRow.appendChild(halfHourLabel);
+		for (let i = 0; i < 7; i++) {
+			let td = document.createElement('td');
+			td.className = 'week-half';
+			td.innerHTML = '';
+			halfRow.appendChild(td);
+		}
+		tbody.appendChild(halfRow);
+	}
+
+	weekEl.innerHTML = '';
+	let thead = document.createElement('thead');
+	thead.appendChild(header);
+	weekEl.appendChild(thead);
+	weekEl.appendChild(tbody);
+	weekEl.classList.remove('hidden');
 }
 
 function eventDetails(event) {
@@ -101,13 +207,13 @@ function eventDetails(event) {
 	whenLabel.appendChild(document.createTextNode('When: '));
 	let when = document.createElement('span');
 	when.className = 'when';
-	let whenText = `${DAYS_OF_WEEK[event.startDate.getDay()].substring(0,3)}, ${MONTHS[event.startDate.getMonth()]} ${event.startDate.getDate()}, ${startTime}${startM} - ${endTime}${endM}`;
+	let whenText = `${DAYS_OF_WEEK[event.startDate.getDay()].substring(0, 3)}, ${MONTHS[event.startDate.getMonth()]} ${event.startDate.getDate()}, ${startTime}${startM} - ${endTime}${endM}`;
 	if (event.days == 1 && event.allDay) {
-		whenText = `${DAYS_OF_WEEK[event.startDate.getDay()]}, ${MONTHS[event.startDate.getMonth()].substring(0,3)} ${event.startDate.getDate()}, ${event.startDate.getFullYear()}`;
+		whenText = `${DAYS_OF_WEEK[event.startDate.getDay()]}, ${MONTHS[event.startDate.getMonth()].substring(0, 3)} ${event.startDate.getDate()}, ${event.startDate.getFullYear()}`;
 	} else if (event.days % 1 == 0 && event.allDay) {
 		let newEnd = new Date(event.endDate.valueOf());
-		newEnd.setDate(newEnd.getDate()-1);
-		whenText = `${MONTHS[event.startDate.getMonth()].substring(0,3)} ${event.startDate.getDate()} - ${MONTHS[newEnd.getMonth()].substring(0,3)} ${newEnd.getDate()}, ${event.startDate.getFullYear()}`;
+		newEnd.setDate(newEnd.getDate() - 1);
+		whenText = `${MONTHS[event.startDate.getMonth()].substring(0, 3)} ${event.startDate.getDate()} - ${MONTHS[newEnd.getMonth()].substring(0, 3)} ${newEnd.getDate()}, ${event.startDate.getFullYear()}`;
 	} else if (event.days > 1) {
 		whenText = `${MONTHS[event.startDate.getMonth()]} ${event.startDate.getDate()}, ${startTime}${startM} - ${MONTHS[event.endDate.getMonth()]} ${event.endDate.getDate()}, ${endTime}${endM}`;
 	}
@@ -116,7 +222,7 @@ function eventDetails(event) {
 	eDetails.appendChild(whenLabel);
 	eDetails.appendChild(when);
 
-	if (event.location != '') {
+	if (typeof event.location === 'string' && event.location !== '') {
 		eDetails.appendChild(document.createElement('br'));
 		let whereLabel = document.createElement('strong');
 		whereLabel.appendChild(document.createTextNode('Where: '));
@@ -152,7 +258,7 @@ function renderAgenda(events) {
 	// Filter after today
 	events = events.filter((e) => {
 		let end = new Date(e.endDate.valueOf());
-		end.setHours(0,0,0,0);
+		end.setHours(0, 0, 0, 0);
 		return end >= today;
 	});
 
@@ -190,7 +296,7 @@ function renderAgenda(events) {
 			row = document.createElement('tr');
 
 			let curDay = new Date(events[i].startDate.valueOf());
-			curDay.setHours(0,0,0,0);
+			curDay.setHours(0, 0, 0, 0);
 			if (curDay.getTime() == today.getTime()) {
 				todayHasEvents = true;
 			}
@@ -204,7 +310,7 @@ function renderAgenda(events) {
 
 		// Indicator
 		let eventDay = new Date(events[i].endDate.valueOf());
-		eventDay.setHours(0,0,0,0);
+		eventDay.setHours(0, 0, 0, 0);
 		if (nowDate < events[i].endDate && !indicatorset && today.getTime() == eventDay.getTime()) {
 			column.appendChild(indicator);
 			indicatorset = true;
@@ -259,7 +365,7 @@ function renderAgenda(events) {
 			column.appendChild(indicator);
 		}
 
-		if (i+1 == events.length || events[i].startDate.toDateString() != events[i+1].startDate.toDateString()) {
+		if (i + 1 == events.length || events[i].startDate.toDateString() != events[i + 1].startDate.toDateString()) {
 			row.appendChild(column);
 			days.push(row);
 		}
@@ -304,7 +410,7 @@ function renderMonth(events, fromDay = new Date(today.valueOf())) {
 		monthEndDate.setDate(monthEndDate.getDate() + 1);
 	}
 	let days = (monthEndDate - monthStartDate) / (24 * 60 * 60 * 1000) + 1;
-	let weeks = days/7;
+	let weeks = days / 7;
 
 	let rows = [];
 
@@ -314,7 +420,7 @@ function renderMonth(events, fromDay = new Date(today.valueOf())) {
 	for (let i = 0; i < 7; i++) {
 		let label = document.createElement('td');
 		let n = i + parseInt(monday_start);
-		label.appendChild(document.createTextNode(DAYS_OF_WEEK[(n == 7 ? 0 : n)].substring(0,3)));
+		label.appendChild(document.createTextNode(DAYS_OF_WEEK[(n == 7 ? 0 : n)].substring(0, 3)));
 		labelRow.appendChild(label);
 	}
 	rows.push(labelRow);
@@ -357,12 +463,12 @@ function renderMonth(events, fromDay = new Date(today.valueOf())) {
 						showMonthDetails(dayEvents[e]);
 					}
 				};
-				event.onclick = () => {showMonthDetails(dayEvents[e])};
+				event.onclick = () => { showMonthDetails(dayEvents[e]) };
 				dayCell.appendChild(event);
 			}
 			weekRow.appendChild(dayCell);
 
-			day.setDate(day.getDate()+1);
+			day.setDate(day.getDate() + 1);
 		}
 		rows.push(weekRow);
 	}
@@ -373,7 +479,7 @@ function renderMonth(events, fromDay = new Date(today.valueOf())) {
 		topHeight = topEl.clientHeight;
 	}
 	let monthEl = document.getElementById('month');
-	monthEl.style.height = `calc(100vh - ${topHeight+8}px)`;
+	monthEl.style.height = `calc(100vh - ${topHeight + 8}px)`;
 	monthEl.innerHTML = '';
 	monthEl.classList.remove('hidden');
 	for (let i = 0; i < rows.length; i++) {
@@ -383,7 +489,7 @@ function renderMonth(events, fromDay = new Date(today.valueOf())) {
 
 function renderCalendar(meta, events) {
 	// Sort events
-	events.sort((a,b) =>  a.startDate - b.startDate);
+	events.sort((a, b) => a.startDate - b.startDate);
 
 	// Title
 	if (show_title == 1) {
@@ -419,7 +525,9 @@ function renderCalendar(meta, events) {
 
 	// View
 	let view = document.getElementById('view');
-	view.value = default_view;
+	// Always force 'Week' as selected on load
+	view.value = '2';
+	selectedView = 2;
 	view.onchange = () => {
 		setView(view.value, events);
 	};
@@ -480,7 +588,7 @@ function parseCalendar(data) {
 			startDate: event.startDate.toJSDate(),
 			endDate: event.endDate.toJSDate(),
 			allDay: event.startDate.isDate,
-			days: (duration.toSeconds()/86400)
+			days: (duration.toSeconds() / 86400)
 		});
 		if (event.isRecurring()) {
 			let expand = new ICAL.RecurExpansion({
@@ -502,7 +610,7 @@ function parseCalendar(data) {
 						startDate: next.toJSDate(),
 						endDate: endDate.toJSDate(),
 						allDay: event.startDate.isDate,
-						days: (duration.toSeconds()/86400)
+						days: (duration.toSeconds() / 86400)
 					});
 				}
 				j++;

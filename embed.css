@@ -1,3 +1,131 @@
+#week .week-hour-label {
+	width: 48px;
+	min-width: 40px;
+	max-width: 60px;
+	text-align: right;
+	font-size: 0.95em;
+	color: #888;
+	padding-right: 8px;
+	background: #f7f7f7;
+	border: none;
+	vertical-align: middle;
+}
+
+#week .week-half-label {
+	width: 48px;
+	min-width: 40px;
+	max-width: 60px;
+	background: #fafafa;
+	border: none;
+	padding: 0;
+}
+
+/* Embed fixed size */
+#embed-wrapper {
+	width: 800px;
+	height: 480px;
+	margin: 0 auto;
+	box-sizing: border-box;
+	overflow: hidden;
+	background: var(--background-color);
+	position: relative;
+}
+
+html,
+body {
+	width: 100%;
+	height: 100%;
+	margin: 0;
+	padding: 0;
+}
+
+body {
+	min-width: 800px;
+	min-height: 480px;
+}
+
+#week .week-hour {
+	border-top: 1px solid #e0e0e0;
+	border-bottom: none;
+	min-height: 32px;
+	position: relative;
+	background: #fff;
+}
+
+#week .week-half {
+	border-top: 1px dotted #e0e0e0;
+	border-bottom: none;
+	min-height: 16px;
+	background: #fafafa;
+}
+
+#week th {
+	border: 0;
+	text-align: center;
+	color: var(--dark-gray);
+	font-weight: bold;
+	height: 1px;
+	font-size: 1em;
+	background: var(--background-color);
+	padding: 6px 0 2px 0;
+}
+
+#week .date {
+	display: block;
+	color: var(--dark-gray);
+	font-size: 1.1em;
+	margin-top: 2px;
+}
+
+#week .date.today {
+	color: var(--theme-color);
+	font-weight: bold;
+}
+
+#week .emptyday {
+	color: var(--dark-gray);
+	font-style: italic;
+	padding: 8px;
+}
+
+#week {
+	table-layout: fixed;
+	border-collapse: collapse;
+	width: calc(100% - 8px);
+	box-sizing: border-box;
+	margin: 4px;
+}
+
+#week td {
+	border: 1px solid var(--border-color);
+	vertical-align: top;
+	overflow: hidden;
+	text-align: center;
+	padding: 8px;
+}
+
+#week .labels td {
+	border: 0;
+	text-align: center;
+	color: var(--dark-gray);
+	font-weight: bold;
+	height: 1px;
+}
+
+#week .event {
+	display: block;
+	white-space: nowrap;
+	cursor: pointer;
+	user-select: none;
+	font-size: .9em;
+	background-color: var(--theme-color);
+	color: var(--theme-text-color);
+	margin: 2px 0;
+	box-sizing: border-box;
+	padding: 2px 4px;
+	border-radius: 3px;
+}
+
 :root {
 	--background-color: #FFF;
 	--dark-gray: #777;
@@ -14,6 +142,7 @@ body {
 	font-family: sans-serif;
 	min-height: 100vh;
 }
+
 #loading {
 	display: flex;
 	position: absolute;
@@ -28,6 +157,7 @@ body {
 	justify-content: center;
 	text-align: center;
 }
+
 #loading.done {
 	display: none;
 }
@@ -52,11 +182,13 @@ nav {
 	display: flex;
 	align-items: center;
 }
+
 nav .spacer {
 	flex: 1;
 }
 
-nav button, nav select {
+nav button,
+nav select {
 	font: inherit;
 	color: inherit;
 	background: 0;
@@ -65,11 +197,13 @@ nav button, nav select {
 	border-radius: 3px;
 	padding: 4px 8px;
 }
+
 nav #arrows {
 	display: flex;
 	align-items: center;
 	margin: 0 10px;
 }
+
 nav #arrows button {
 	border: 0;
 	padding: 0;
@@ -81,12 +215,15 @@ nav #arrows button {
 	transition: background-color .2s;
 	outline: 0;
 }
+
 nav #arrows button:hover {
-	background-color: rgba(0,0,0,.1);
+	background-color: rgba(0, 0, 0, .1);
 }
+
 nav #arrows button:focus {
-	background-color: rgba(0,0,0,.2);
+	background-color: rgba(0, 0, 0, .2);
 }
+
 nav #arrows button svg {
 	height: 24px;
 	width: 24px;
@@ -98,16 +235,19 @@ nav #date_label {
 	align-items: center;
 	position: relative;
 }
+
 nav #date_label:hover,
 nav #date_label:focus,
 nav #date_label:focus-within {
 	text-decoration: underline;
 }
+
 nav #date_label svg {
 	height: 24px;
 	width: 24px;
 	padding-left: 4px;
 }
+
 nav #date_dropdown {
 	position: absolute;
 	top: 100%;
@@ -117,16 +257,19 @@ nav #date_dropdown {
 	opacity: 0;
 	pointer-events: none;
 }
+
 nav #date_label:focus #date_dropdown,
 nav #date_label:focus-within #date_dropdown {
 	opacity: 1;
 	pointer-events: all;
 }
+
 nav #date {
 	width: 100%;
 }
 
-#month.hidden, #agenda.hidden {
+#month.hidden,
+#agenda.hidden {
 	display: none;
 }
 
@@ -137,24 +280,29 @@ nav #date {
 	box-sizing: border-box;
 	margin: 4px;
 }
+
 #emptystate td {
 	text-align: left !important;
 	color: var(--dark-gray);
 }
+
 #agenda .emptyday {
 	padding-left: 5px;
 	vertical-align: middle;
 	font-style: italic;
 	color: var(--dark-gray);
 }
+
 #agenda tr td {
 	padding-top: 14px;
 	vertical-align: top;
 }
+
 #agenda tr td:first-child {
 	width: 60px;
 	text-align: center;
 }
+
 #agenda .dayname,
 #agenda .month {
 	display: block;
@@ -163,16 +311,19 @@ nav #date {
 	letter-spacing: .1em;
 	color: var(--dark-gray);
 }
+
 #agenda .day {
 	display: flex;
 	font-size: 1.2em;
 	align-items: center;
 	justify-content: center;
 }
+
 #agenda .today .dayname,
 #agenda .today .month {
 	color: var(--theme-color);
 }
+
 #agenda .today .day span {
 	display: flex;
 	align-items: center;
@@ -192,35 +343,44 @@ nav #date {
 	border-radius: 3px;
 	margin-left: 5px;
 }
+
 #agenda .event a {
 	color: inherit;
 }
+
 #agenda .event .summary {
 	padding: 10px;
 	cursor: pointer;
 }
+
 #agenda .event.open.always .summary {
 	cursor: initial;
 }
+
 #agenda .event .name {
 	display: block;
 	font-weight: bold;
 }
+
 #agenda .event:hover .name,
 #agenda .event:focus .name,
 #agenda .event.open .name {
 	text-decoration: underline;
 }
+
 #agenda .event.open.always .name {
 	text-decoration: none;
 }
+
 #agenda .event.open .time {
 	display: none;
 }
+
 #agenda .event .details {
 	display: none;
 	padding: 0 10px 10px;
 }
+
 #agenda .event.open .details {
 	margin-top: 4px;
 	display: block;
@@ -233,6 +393,7 @@ nav #date {
 	margin-bottom: 8px;
 	position: relative;
 }
+
 #agenda .indicator:before {
 	content: '';
 	position: absolute;
@@ -252,11 +413,13 @@ nav #date {
 	box-sizing: border-box;
 	margin: 4px;
 }
+
 #month td {
 	border: 1px solid var(--border-color);
 	vertical-align: top;
 	overflow: hidden;
 }
+
 #month .labels td {
 	border: 0;
 	text-align: center;
@@ -264,15 +427,18 @@ nav #date {
 	font-weight: bold;
 	height: 1px;
 }
+
 #month td .date {
 	text-align: center;
 	display: block;
 	color: var(--dark-gray);
 	margin-top: 1px;
 }
+
 #month td .date.current {
 	color: var(--text-color);
 }
+
 #month td .date span {
 	display: inline-flex;
 	align-items: center;
@@ -281,10 +447,12 @@ nav #date {
 	width: 1.7em;
 	border-radius: 100px;
 }
+
 #month td .date.today span {
 	background-color: var(--theme-color);
 	color: var(--theme-text-color);
 }
+
 #month .event {
 	display: block;
 	white-space: nowrap;
@@ -298,6 +466,7 @@ nav #date {
 	padding: 2px 4px;
 	border-radius: 3px;
 }
+
 #month .past .event {
 	opacity: .6;
 }
@@ -313,20 +482,23 @@ nav #date {
 	display: none;
 	overflow-y: auto;
 }
+
 #monthDetails.shown {
 	display: flex;
 }
+
 #monthDetails .dialog {
 	background-color: var(--background-color);
 	pointer-events: all;
 	max-width: 60%;
-	box-shadow: 0 5px 30px rgba(0,0,0,.6);
+	box-shadow: 0 5px 30px rgba(0, 0, 0, .6);
 	border-radius: 10px;
 	box-sizing: border-box;
 	padding: 40px 20px 20px;
 	position: relative;
 	margin: auto;
 }
+
 #monthDetails button {
 	position: absolute;
 	top: 14px;
@@ -342,17 +514,21 @@ nav #date {
 	outline: 0;
 	background-color: transparent;
 }
+
 #monthDetails button:hover {
-	background-color: rgba(0,0,0,.1);
+	background-color: rgba(0, 0, 0, .1);
 }
+
 #monthDetails button:focus {
-	background-color: rgba(0,0,0,.2);
+	background-color: rgba(0, 0, 0, .2);
 }
+
 #monthDetails button svg {
 	height: 24px;
 	width: 24px;
 	padding: 3px;
 }
+
 #monthDetails .summary {
 	display: block;
 	font-size: 1.6em;
