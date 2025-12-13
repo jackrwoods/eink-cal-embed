@@ -1,4 +1,4 @@
-const CORS_URL = 'https://cors-anywhere.herokuapp.com/';
+const CORS_URL = 'https://corsproxy.io/?url=';
 
 const ical_field = document.getElementById('ical');
 const show_title_field = document.getElementById('show_title');
@@ -187,9 +187,14 @@ copy_button.addEventListener('click', () => {
 });
 
 cors_button.addEventListener('click', () => {
-	if (!ical_field.value.startsWith(CORS_URL)) {
-		ical_field.value = CORS_URL + ical_field.value;
+	let url = ical_field.value;
+	// Remove existing proxy if present
+	if (url.includes('corsproxy.io')) {
+		url = new URL(url).searchParams.get('url') || url;
+	} else if (url.includes('cors-anywhere.herokuapp.com')) {
+		url = url.replace('https://cors-anywhere.herokuapp.com/', '');
 	}
+	ical_field.value = CORS_URL + encodeURIComponent(url);
 	ical = ical_field.value;
 	refresh();
 });
