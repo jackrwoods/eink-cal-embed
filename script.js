@@ -9,6 +9,7 @@ const show_view_field = document.getElementById('show_view');
 const show_when_field = document.getElementById('show_when');
 const show_description_field = document.getElementById('show_description');
 const monday_start_field = document.getElementById('monday_start');
+const start_today_field = document.getElementById('start_today');
 const default_view_field = document.getElementById('default_view');
 const font_family_field = document.getElementById('font_family');
 const min_hour_field = document.getElementById('min_hour');
@@ -32,6 +33,7 @@ let show_view = 1;
 let show_when = 1;
 let show_description = 1;
 let monday_start = 0;
+let start_today = 0;
 let default_view = 0;
 let font_family = 'open-sans';
 let min_hour = '';
@@ -48,7 +50,7 @@ function refresh() {
 	let fontParam = font_family !== 'open-sans' ? `&font=${encodeURIComponent(font_family)}` : '';
 	let whenParam = show_when === 0 ? `&when=${show_when}` : '';
 	let descParam = show_description === 0 ? `&desc=${show_description}` : '';
-	let embed = `${document.URL.substr(0, document.URL.lastIndexOf('/'))}/iframe.html?ical=${encodeURIComponent(ical)}&title=${show_title}&nav=${show_nav}&date=${show_date}&view=${show_view}&details=${show_details}&monstart=${monday_start}&dview=${default_view}&color=${encodeURIComponent(color)}&colorbg=${encodeURIComponent(colorbg)}&colortxt=${encodeURIComponent(colortxt)}&colorsecondarytxt=${encodeURIComponent(colorsecondarytxt)}${minHourParam}${maxHourParam}${fontParam}${whenParam}${descParam}`;
+	let embed = `${document.URL.substr(0, document.URL.lastIndexOf('/'))}/iframe.html?ical=${encodeURIComponent(ical)}&title=${show_title}&nav=${show_nav}&date=${show_date}&view=${show_view}&details=${show_details}&monstart=${monday_start}&starttoday=${start_today}&dview=${default_view}&color=${encodeURIComponent(color)}&colorbg=${encodeURIComponent(colorbg)}&colortxt=${encodeURIComponent(colortxt)}&colorsecondarytxt=${encodeURIComponent(colorsecondarytxt)}${minHourParam}${maxHourParam}${fontParam}${whenParam}${descParam}`;
 	embed_field.value = embed;
 	iframe.src = embed;
 }
@@ -108,6 +110,11 @@ show_description_field.addEventListener('change', () => {
 
 monday_start_field.addEventListener('change', () => {
 	monday_start = monday_start_field.checked ? 1 : 0;
+	refresh();
+});
+
+start_today_field.addEventListener('change', () => {
+	start_today = start_today_field.checked ? 1 : 0;
 	refresh();
 });
 

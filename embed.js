@@ -23,6 +23,7 @@ const colorThemeText = url.searchParams.get('colorsecondarytxt') || '#FFFFFF';
 const fontFamily = url.searchParams.get('font') || 'open-sans';
 const showWhen = url.searchParams.get('when') !== '0';
 const showDescription = url.searchParams.get('desc') !== '0';
+const startToday = url.searchParams.get('starttoday') === '1';
 
 // Convert hex color to RGB for use in rgba()
 function hexToRgb(hex) {
@@ -125,18 +126,25 @@ function setView(newView, events) {
 }
 
 function renderWeek(events) {
-	// Find the Monday of the current week
+	// Find the first day of the week
 	let weekEl = document.getElementById('week');
 	let baseDay = new Date(selectedDay.valueOf());
 	let dayOfWeek = baseDay.getDay();
-	let monday = new Date(baseDay.valueOf());
-	monday.setDate(baseDay.getDate() - ((dayOfWeek + 6) % 7));
+	let weekStart = new Date(baseDay.valueOf());
+
+	if (startToday) {
+		// Start week on today (selected day)
+		// No adjustment needed, weekStart is already at baseDay
+	} else {
+		// Start week on Monday
+		weekStart.setDate(baseDay.getDate() - ((dayOfWeek + 6) % 7));
+	}
 
 	// Find min and max hours with events in the week
 	let hoursWithEvents = new Set();
 	for (let i = 0; i < 7; i++) {
-		let d = new Date(monday.valueOf());
-		d.setDate(monday.getDate() + i);
+		let d = new Date(weekStart.valueOf());
+		d.setDate(weekStart.getDate() + i);
 		let dayStr = getHumanDate(d);
 		let dayHasAllDay = events.some(e => getHumanDate(e.startDate) === dayStr && e.allDay);
 		events.forEach(e => {
@@ -173,10 +181,10 @@ function renderWeek(events) {
 	emptyTh.className = 'week-hour-label';
 	header.appendChild(emptyTh);
 	for (let i = 0; i < 7; i++) {
-		let d = new Date(monday.valueOf());
-		d.setDate(monday.getDate() + i);
+		let d = new Date(weekStart.valueOf());
+		d.setDate(weekStart.getDate() + i);
 		let th = document.createElement('th');
-		th.innerText = DAYS_OF_WEEK[(i + 1) % 7].substring(0, 3); // Mon, Tue, ...
+		th.innerText = DAYS_OF_WEEK[(d.getDay())].substring(0, 3);
 		let dateSpan = document.createElement('span');
 		dateSpan.className = 'date';
 		dateSpan.innerText = d.getDate();
@@ -201,8 +209,8 @@ function renderWeek(events) {
 		row.appendChild(hourLabel);
 
 		for (let i = 0; i < 7; i++) {
-			let d = new Date(monday.valueOf());
-			d.setDate(monday.getDate() + i);
+			let d = new Date(weekStart.valueOf());
+			d.setDate(weekStart.getDate() + i);
 			let td = document.createElement('td');
 			td.className = 'week-hour';
 			td.dataset.date = getHumanDate(d);
