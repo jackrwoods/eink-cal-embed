@@ -667,7 +667,7 @@ function renderCalendar(meta, events) {
 
 	setView(selectedView, events);
 
-	loading.style.display = 'none';
+	loading.classList.remove('loading');
 }
 
 function parseCalendar(data) {
@@ -750,6 +750,7 @@ function parseCalendar(data) {
 }
 
 if (ical) {
+	loading.classList.add('loading');
 	fetch(ical).then((response) => {
 		response.text().then((text) => {
 			parseCalendar(text);
@@ -757,7 +758,9 @@ if (ical) {
 	}).catch((e) => {
 		console.error(e);
 		loading.innerHTML = "Error: iCal URL doesn't exist or isn't valid<br><br>Common causes:<br>- CORS proxy blocked the request<br>- Calendar URL is unreachable<br>- Network connectivity issue";
+		loading.classList.remove('loading');
 	});
 } else {
 	loading.innerHTML = "Error: no iCal URL provided";
+	loading.classList.add('loading');
 }

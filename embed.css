@@ -168,7 +168,7 @@ body.font-crimson-text {
 }
 
 #loading {
-	display: flex;
+	display: none;
 	position: absolute;
 	z-index: 1000;
 	background-color: var(--background-color);
@@ -184,14 +184,14 @@ body.font-crimson-text {
 	box-sizing: border-box;
 }
 
-#loading.done {
-	display: none;
+#loading.loading {
+	display: flex;
 }
 
-#loading:not(.done) ~ #top,
-#loading:not(.done) ~ #agenda,
-#loading:not(.done) ~ #month,
-#loading:not(.done) ~ #week {
+#loading.loading ~ #top,
+#loading.loading ~ #agenda,
+#loading.loading ~ #month,
+#loading.loading ~ #week {
 	display: none;
 }
 
