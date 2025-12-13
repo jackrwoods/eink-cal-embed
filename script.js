@@ -194,6 +194,8 @@ cors_button.addEventListener('click', () => {
 	} else if (url.includes('cors-anywhere.herokuapp.com')) {
 		url = url.replace('https://cors-anywhere.herokuapp.com/', '');
 	}
+	// Convert http:// to https:// to avoid mixed content errors
+	url = url.replace(/^http:\/\//, 'https://');
 	ical_field.value = CORS_URL + encodeURIComponent(url);
 	ical = ical_field.value;
 	refresh();
