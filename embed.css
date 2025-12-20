@@ -6,7 +6,7 @@
 	font-size: 0.95em;
 	color: var(--text-color);
 	padding-right: 8px;
-	background: #f7f7f7;
+	background: var(--background-color);
 	border: none;
 	vertical-align: middle;
 }
@@ -15,7 +15,7 @@
 	width: 48px;
 	min-width: 40px;
 	max-width: 60px;
-	background: #fafafa;
+	background: var(--background-color);
 	border: none;
 	padding: 0;
 }
