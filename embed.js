@@ -136,6 +136,8 @@ function setView(newView, events) {
 		renderMonth(events);
 	} else if (selectedView == 2) {
 		renderWeek(events);
+	} else if (selectedView == 3) {
+		render5DayWeek(events);
 	} else {
 		renderAgenda(events);
 	}
@@ -302,6 +304,193 @@ function renderWeek(events) {
 		halfHourLabel.innerHTML = '';
 		halfRow.appendChild(halfHourLabel);
 		for (let i = 0; i < 7; i++) {
+			let d = new Date(weekStart.valueOf());
+			d.setDate(weekStart.getDate() + i);
+			let td = document.createElement('td');
+			td.className = 'week-half';
+			td.innerHTML = '';
+			if (getHumanDate(d) === getHumanDate(today)) {
+				td.dataset.today = 'true';
+			}
+			halfRow.appendChild(td);
+		}
+		tbody.appendChild(halfRow);
+	}
+
+	weekEl.innerHTML = '';
+	let thead = document.createElement('thead');
+	thead.appendChild(header);
+	weekEl.appendChild(thead);
+	weekEl.appendChild(tbody);
+	weekEl.classList.remove('hidden');
+}
+
+function render5DayWeek(events) {
+	// Find the first day of the week (Mon-Fri)
+	let weekEl = document.getElementById('week');
+	let baseDay = new Date(selectedDay.valueOf());
+	let dayOfWeek = baseDay.getDay();
+	let weekStart = new Date(baseDay.valueOf());
+
+	if (startToday) {
+		// Start 5-day week on today (selected day) or nearest Monday
+		// If today is Sat/Sun, start on previous Monday
+		if (dayOfWeek === 0) {
+			weekStart.setDate(baseDay.getDate() - 2);
+		} else if (dayOfWeek === 6) {
+			weekStart.setDate(baseDay.getDate() - 1);
+		}
+	} else {
+		// Start week on Monday
+		weekStart.setDate(baseDay.getDate() - ((dayOfWeek + 6) % 7));
+	}
+
+	// Find min and max hours with events in the 5-day period
+	let hoursWithEvents = new Set();
+	for (let i = 0; i < 5; i++) {
+		let d = new Date(weekStart.valueOf());
+		d.setDate(weekStart.getDate() + i);
+		let dayStr = getHumanDate(d);
+		let dayHasAllDay = events.some(e => getHumanDate(e.startDate) === dayStr && e.allDay);
+		events.forEach(e => {
+			if (getHumanDate(e.startDate) === dayStr && !e.allDay) {
+				hoursWithEvents.add(e.startDate.getHours());
+			}
+		});
+	}
+
+	// Determine hours to show: use URL params if provided, otherwise auto-detect from events
+	let hoursToShow;
+	if (min_hour !== null && max_hour !== null) {
+		// User specified both min and max
+		let minH = parseInt(min_hour);
+		let maxH = parseInt(max_hour);
+		hoursToShow = Array.from({length: maxH - minH + 1}, (_, i) => minH + i);
+	} else if (min_hour !== null) {
+		// User specified only min, go to 8pm
+		let minH = parseInt(min_hour);
+		hoursToShow = Array.from({length: 20 - minH}, (_, i) => minH + i);
+	} else if (max_hour !== null) {
+		// User specified only max, go from 8am
+		let maxH = parseInt(max_hour);
+		hoursToShow = Array.from({length: maxH - 8 + 1}, (_, i) => 8 + i);
+	} else {
+		// Auto-detect from events
+		hoursToShow = hoursWithEvents.size > 0 ? Array.from(hoursWithEvents).sort((a, b) => a - b) : Array.from({length: 12}, (_, i) => i + 8);
+	}
+
+	// Build header row (Hour label + Mon-Fri)
+	let header = document.createElement('tr');
+	// Empty top-left cell for hour labels
+	let emptyTh = document.createElement('th');
+	emptyTh.className = 'week-hour-label';
+	header.appendChild(emptyTh);
+	for (let i = 0; i < 5; i++) {
+		let d = new Date(weekStart.valueOf());
+		d.setDate(weekStart.getDate() + i);
+		let th = document.createElement('th');
+		th.innerText = DAYS_OF_WEEK[(d.getDay())].substring(0, 3);
+		let dateSpan = document.createElement('span');
+		dateSpan.className = 'date';
+		dateSpan.innerText = d.getDate();
+		if (getHumanDate(d) === getHumanDate(today)) dateSpan.classList.add('today');
+		th.appendChild(document.createElement('br'));
+		th.appendChild(dateSpan);
+		header.appendChild(th);
+	}
+
+	// Build time grid - only show hours with events (or default range if empty)
+	let tbody = document.createElement('tbody');
+	let hoursToRender = hoursToShow;
+
+	for (let hour of hoursToRender) {
+		// Full hour row
+		let row = document.createElement('tr');
+		// Hour label cell
+		let hourLabel = document.createElement('td');
+		hourLabel.className = 'week-hour-label';
+		let hourText = (hour === 12 ? '12pm' : hour === 0 ? '12am' : hour < 12 ? hour + 'am' : (hour - 12) + 'pm');
+		hourLabel.innerText = hourText;
+		row.appendChild(hourLabel);
+
+		for (let i = 0; i < 5; i++) {
+			let d = new Date(weekStart.valueOf());
+			d.setDate(weekStart.getDate() + i);
+			let td = document.createElement('td');
+			td.className = 'week-hour';
+			td.dataset.date = getHumanDate(d);
+			td.dataset.hour = hour;
+			if (getHumanDate(d) === getHumanDate(today)) {
+				td.dataset.today = 'true';
+			}
+
+			let dayStr = getHumanDate(d);
+
+			// Separate all-day and timed events
+			let timedEvents = events.filter(e => dayStr === getHumanDate(e.startDate) && !e.allDay && e.startDate.getHours() === hour);
+			let allDayEvents = events.filter(e => dayStr === getHumanDate(e.startDate) && e.allDay);
+
+			// Render all-day events as semi-transparent background
+			if (allDayEvents.length > 0 && hour === hoursToRender[0]) {
+				// Only show all-day events in the first hour row of the day
+				for (let e = 0; e < allDayEvents.length; e++) {
+					let event = document.createElement('div');
+					event.className = 'event event-allday';
+					let summary = document.createElement('div');
+					summary.className = 'summary';
+					let eName = document.createElement('span');
+					eName.className = 'name';
+					eName.appendChild(document.createTextNode(truncateText(allDayEvents[e].name)));
+					summary.appendChild(eName);
+					event.appendChild(summary);
+					event.appendChild(eventDetails(allDayEvents[e]));
+					td.appendChild(event);
+				}
+			}
+
+			// Render timed events on top
+			for (let e = 0; e < timedEvents.length; e++) {
+				let event = document.createElement('div');
+				event.className = 'event';
+				let summary = document.createElement('div');
+				summary.className = 'summary';
+				let eName = document.createElement('span');
+				eName.className = 'name';
+				eName.appendChild(document.createTextNode(truncateText(timedEvents[e].name)));
+				summary.appendChild(eName);
+				if (showWhen) {
+					let startTime = `${(timedEvents[e].startDate.getHours() % 12) || 12}:${timedEvents[e].startDate.getMinutes().toString().padStart(2, '0')}`;
+					let endTime = `${(timedEvents[e].endDate.getHours() % 12) || 12}:${timedEvents[e].endDate.getMinutes().toString().padStart(2, '0')}`;
+					let startM = ampm(timedEvents[e].startDate.getHours());
+					let endM = ampm(timedEvents[e].endDate.getHours());
+					let eTime = document.createElement('span');
+					eTime.className = 'time';
+					let timeText = `${startTime} ${startM == endM ? '' : startM} - ${endTime} ${endM}`;
+					if (timedEvents[e].days === 0) {
+						timeText = `${startTime} ${startM}`;
+					} else if (timedEvents[e].days > 1 && !timedEvents[e].allDay) {
+						timeText = `${MONTHS[timedEvents[e].startDate.getMonth()]} ${timedEvents[e].startDate.getDate()}, ${startTime}${startM} - ${MONTHS[timedEvents[e].endDate.getMonth()]} ${timedEvents[e].endDate.getDate()}, ${endTime}${endM}`;
+					}
+					eTime.appendChild(document.createTextNode(timeText));
+					summary.appendChild(eTime);
+				}
+				event.appendChild(summary);
+				event.appendChild(eventDetails(timedEvents[e]));
+				td.appendChild(event);
+			}
+
+			row.appendChild(td);
+		}
+		tbody.appendChild(row);
+
+		// Half-hour row (dotted)
+		let halfRow = document.createElement('tr');
+		// Empty cell for half-hour label
+		let halfHourLabel = document.createElement('td');
+		halfHourLabel.className = 'week-half-label';
+		halfHourLabel.innerHTML = '';
+		halfRow.appendChild(halfHourLabel);
+		for (let i = 0; i < 5; i++) {
 			let d = new Date(weekStart.valueOf());
 			d.setDate(weekStart.getDate() + i);
 			let td = document.createElement('td');
@@ -656,9 +845,9 @@ function renderCalendar(meta, events) {
 
 	// View
 	let view = document.getElementById('view');
-	// Always force 'Week' as selected on load
-	view.value = '2';
-	selectedView = 2;
+	// Set view to the default_view from URL params
+	view.value = default_view;
+	selectedView = default_view;
 	view.onchange = () => {
 		setView(view.value, events);
 	};
