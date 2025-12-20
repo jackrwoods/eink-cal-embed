@@ -45,7 +45,7 @@ body {
 }
 
 #week .week-hour {
-	border-top: 1px solid #e0e0e0;
+	border-top: 2px solid var(--border-color);
 	border-bottom: none;
 	min-height: 32px;
 	position: relative;
@@ -53,29 +53,30 @@ body {
 }
 
 #week .week-hour[data-today="true"] {
-	background: rgba(var(--theme-color-rgb), 0.08);
+	background: rgba(var(--theme-color-rgb), 0.12);
 }
 
 #week .week-half {
-	border-top: 1px dotted #e0e0e0;
+	border-top: 1px solid var(--border-color);
 	border-bottom: none;
 	min-height: 16px;
 	background: #fafafa;
 }
 
 #week .week-half[data-today="true"] {
-	background: rgba(var(--theme-color-rgb), 0.12);
+	background: rgba(var(--theme-color-rgb), 0.15);
 }
 
 #week th {
-	border: 0;
+	border-bottom: 2px solid var(--border-color);
 	text-align: center;
 	color: var(--text-color);
-	font-weight: bold;
+	font-weight: 700;
 	height: 1px;
-	font-size: 1em;
+	font-size: 1.05em;
 	background: var(--background-color);
-	padding: 6px 0 2px 0;
+	padding: 8px 0 4px 0;
+	letter-spacing: 0.5px;
 }
 
 #week .date {
@@ -105,7 +106,7 @@ body {
 }
 
 #week td {
-	border: 1px solid var(--border-color);
+	border: 2px solid var(--border-color);
 	vertical-align: top;
 	overflow: hidden;
 	text-align: center;
@@ -126,16 +127,19 @@ body {
 	word-break: break-word;
 	cursor: pointer;
 	user-select: none;
-	font-size: .75em;
+	font-size: 0.8em;
+	font-weight: 600;
 	background-color: var(--theme-color);
 	color: var(--theme-text-color);
-	margin: 1px 0;
+	margin: 2px 0;
 	box-sizing: border-box;
-	padding: 1px 2px;
-	border-radius: 3px;
+	padding: 3px 4px;
+	border-radius: 2px;
 	overflow: hidden;
 	position: relative;
 	z-index: 2;
+	border: 1px solid rgba(0, 0, 0, 0.15);
+	line-height: 1.3;
 }
 
 #week .event-allday {
@@ -150,9 +154,9 @@ body {
 
 :root {
 	--background-color: #FEFEF8;
-	--dark-gray: #777;
-	--border-color: #AAA;
-	--text-color: #3E3E3E;
+	--dark-gray: #333;
+	--border-color: #222;
+	--text-color: #1A1A1A;
 	--theme-color: #8B6F47;
 	--theme-color-rgb: 139, 111, 71;
 	--theme-text-color: #FFF;
@@ -164,6 +168,7 @@ body {
 	color: var(--text-color);
 	font-family: "Open Sans", sans-serif;
 	min-height: 100vh;
+	font-weight: 500;
 }
 
 /* Font options */
@@ -228,7 +233,9 @@ body.font-crimson-text {
 #title {
 	margin: 0;
 	margin-bottom: 6px;
-	font-size: 1.3em;
+	font-size: 1.4em;
+	font-weight: 700;
+	letter-spacing: 0.3px;
 }
 
 nav {
@@ -244,11 +251,13 @@ nav button,
 nav select {
 	font: inherit;
 	color: inherit;
-	background: 0;
-	font-size: 0.8em;
-	border: 1px solid var(--border-color);
+	background: #fff;
+	font-size: 0.85em;
+	font-weight: 600;
+	border: 2px solid var(--border-color);
 	border-radius: 3px;
-	padding: 4px 8px;
+	padding: 5px 10px;
+	cursor: pointer;
 }
 
 nav #arrows {
@@ -359,15 +368,17 @@ nav #date {
 #agenda .dayname,
 #agenda .month {
 	display: block;
-	font-size: .6em;
-	font-weight: bold;
-	letter-spacing: .1em;
+	font-size: 0.65em;
+	font-weight: 700;
+	letter-spacing: 0.15em;
 	color: var(--dark-gray);
+	text-transform: uppercase;
 }
 
 #agenda .day {
 	display: flex;
-	font-size: 1.2em;
+	font-size: 1.3em;
+	font-weight: 700;
 	align-items: center;
 	justify-content: center;
 }
@@ -392,9 +403,11 @@ nav #date {
 #agenda .event {
 	background-color: var(--theme-color);
 	color: var(--theme-text-color);
-	margin-bottom: 8px;
+	margin-bottom: 10px;
 	border-radius: 3px;
 	margin-left: 5px;
+	border: 1px solid rgba(0, 0, 0, 0.15);
+	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 #agenda .event a {
@@ -402,8 +415,9 @@ nav #date {
 }
 
 #agenda .event .summary {
-	padding: 10px;
+	padding: 12px;
 	cursor: pointer;
+	display: block;
 }
 
 #agenda .event.open.always .summary {
@@ -412,7 +426,8 @@ nav #date {
 
 #agenda .event .name {
 	display: block;
-	font-weight: bold;
+	font-weight: 700;
+	font-size: 1em;
 }
 
 #agenda .event:hover .name,
@@ -440,10 +455,10 @@ nav #date {
 }
 
 #agenda .indicator {
-	height: 2px;
+	height: 3px;
 	width: 100%;
 	background-color: var(--text-color);
-	margin-bottom: 8px;
+	margin-bottom: 10px;
 	position: relative;
 }
 
@@ -451,9 +466,9 @@ nav #date {
 	content: '';
 	position: absolute;
 	left: 0;
-	top: -4px;
-	height: 10px;
-	width: 10px;
+	top: -5px;
+	height: 13px;
+	width: 13px;
 	background-color: var(--text-color);
 	border-radius: 100px;
 }
@@ -468,17 +483,22 @@ nav #date {
 }
 
 #month td {
-	border: 1px solid var(--border-color);
+	border: 2px solid var(--border-color);
 	vertical-align: top;
 	overflow: hidden;
+	padding: 4px;
 }
 
 #month .labels td {
 	border: 0;
+	border-bottom: 2px solid var(--border-color);
 	text-align: center;
 	color: var(--dark-gray);
-	font-weight: bold;
+	font-weight: 700;
+	font-size: 0.95em;
 	height: 1px;
+	padding: 6px 0;
+	letter-spacing: 0.3px;
 }
 
 #month td .date {
@@ -486,19 +506,23 @@ nav #date {
 	display: block;
 	color: var(--dark-gray);
 	margin-top: 1px;
+	font-weight: 600;
+	font-size: 0.95em;
 }
 
 #month td .date.current {
 	color: var(--text-color);
+	font-weight: 700;
 }
 
 #month td .date span {
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
-	height: 1.7em;
-	width: 1.7em;
+	height: 1.8em;
+	width: 1.8em;
 	border-radius: 100px;
+	font-weight: 700;
 }
 
 #month td .date.today span {
@@ -511,13 +535,17 @@ nav #date {
 	white-space: nowrap;
 	cursor: pointer;
 	user-select: none;
-	font-size: .9em;
+	font-size: 0.9em;
+	font-weight: 600;
 	background-color: var(--theme-color);
 	color: var(--theme-text-color);
-	margin: 2px 0;
+	margin: 3px 0;
 	box-sizing: border-box;
-	padding: 2px 4px;
-	border-radius: 3px;
+	padding: 3px 5px;
+	border-radius: 2px;
+	border: 1px solid rgba(0, 0, 0, 0.15);
+	overflow: hidden;
+	text-overflow: ellipsis;
 }
 
 #month .past .event {
