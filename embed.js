@@ -127,6 +127,108 @@ function selectDay(date, focus = true, events = null) {
 	}
 }
 
+function calculateHoursToShow(hoursWithEvents) {
+	// Rules:
+	// 1. Always show exactly 7 hours
+	// 2. If no events, show 12-19 (7 hours)
+	// 3. If events span > 7 hours, skip gaps: show padding around first and last events
+	// 4. If too dense, show only 12-19 (noon onwards, 7 hours)
+
+	if (hoursWithEvents.size === 0) {
+		// No events - show 12-19 (7 hours), but reduce if needed for height
+		let result = Array.from({length: 7}, (_, i) => 12 + i);
+		return reduceHoursIfNeeded(result);
+	}
+
+	const sortedHours = Array.from(hoursWithEvents).sort((a, b) => a - b);
+	const minHour = sortedHours[0];
+	const maxHour = sortedHours[sortedHours.length - 1];
+	const hourSpan = maxHour - minHour;
+
+	if (hourSpan < 7) {
+		// Events fit within 7 hours, show all hours between min and max
+		const result = Array.from({length: hourSpan + 1}, (_, i) => minHour + i);
+		// Pad to exactly 7 hours if needed
+		while (result.length < 7) {
+			if (result[result.length - 1] < 23) {
+				result.push(result[result.length - 1] + 1);
+			} else if (result[0] > 0) {
+				result.unshift(result[0] - 1);
+			} else {
+				break;
+			}
+		}
+		return result.slice(0, 7);
+	}
+
+	// Events span >= 7 hours - skip gaps between events
+	// Add padding around first and last events, distributing 7 total hours
+
+	// Calculate how much padding we can add before first event and after last event
+	const paddingBefore = minHour; // Max hours we can go back
+	const paddingAfter = 23 - maxHour; // Max hours we can go forward
+	const totalPaddingAvailable = paddingBefore + paddingAfter;
+
+	// We have 7 hours total, minus space for at least the min and max hours = at most 5 hours of padding
+	const maxPaddingToUse = 5;
+	const paddingToUse = Math.min(maxPaddingAvailable, maxPaddingToUse);
+
+	// Distribute padding proportionally before and after
+	let padBefore, padAfter;
+	if (totalPaddingAvailable === 0) {
+		padBefore = 0;
+		padAfter = 0;
+	} else {
+		padBefore = Math.floor((paddingBefore / totalPaddingAvailable) * paddingToUse);
+		padAfter = paddingToUse - padBefore;
+		// Adjust if we exceed available padding
+		padBefore = Math.min(padBefore, paddingBefore);
+		padAfter = Math.min(padAfter, paddingAfter);
+	}
+
+	const startHour = minHour - padBefore;
+	const endHour = maxHour + padAfter;
+	const result = Array.from({length: endHour - startHour + 1}, (_, i) => startHour + i);
+
+	// Ensure exactly 7 hours
+	if (result.length > 7) {
+		return result.slice(0, 7);
+	} else if (result.length < 7) {
+		// Pad to 7 hours
+		while (result.length < 7) {
+			if (result[result.length - 1] < 23) {
+				result.push(result[result.length - 1] + 1);
+			} else if (result[0] > 0) {
+				result.unshift(result[0] - 1);
+			} else {
+				break;
+			}
+		}
+	}
+
+	return reduceHoursIfNeeded(result.slice(0, 7));
+}
+
+function reduceHoursIfNeeded(hours) {
+	// Check if rendering these hours will exceed 480px height
+	// Each hour = 32px (hour row) + 16px (half row) = 48px
+	// Header ~60px, nav ~40px, title ~30px, spacing/padding ~20px = ~150px overhead
+	// So available for hours: 480 - 150 = 330px
+	// Max hours that fit: 330 / 48 = 6.875, so 6 hours safely fit
+
+	const AVAILABLE_HEIGHT = 330; // px available for hours
+	const PIXELS_PER_HOUR = 48; // 32px hour + 16px half
+	const MAX_HOURS = Math.floor(AVAILABLE_HEIGHT / PIXELS_PER_HOUR);
+
+	if (hours.length <= MAX_HOURS) {
+		// Fits within height constraint
+		return hours;
+	}
+
+	// Need to reduce hours - keep first MAX_HOURS
+	return hours.slice(0, MAX_HOURS);
+}
+
 function setView(newView, events) {
 	selectedView = newView;
 	document.getElementById('agenda').classList.add('hidden');
@@ -172,7 +274,7 @@ function renderWeek(events) {
 		});
 	}
 
-	// Determine hours to show: use URL params if provided, otherwise auto-detect from events
+	// Determine hours to show: use URL params if provided, otherwise use new calculation logic
 	let hoursToShow;
 	if (min_hour !== null && max_hour !== null) {
 		// User specified both min and max
@@ -188,8 +290,8 @@ function renderWeek(events) {
 		let maxH = parseInt(max_hour);
 		hoursToShow = Array.from({length: maxH - 8 + 1}, (_, i) => 8 + i);
 	} else {
-		// Auto-detect from events
-		hoursToShow = hoursWithEvents.size > 0 ? Array.from(hoursWithEvents).sort((a, b) => a - b) : Array.from({length: 12}, (_, i) => i + 8);
+		// Auto-detect from events using new logic: exactly 7 hours
+		hoursToShow = calculateHoursToShow(hoursWithEvents);
 	}
 
 	// Build header row (Hour label + Mon-Sun)
@@ -359,7 +461,7 @@ function render5DayWeek(events) {
 		});
 	}
 
-	// Determine hours to show: use URL params if provided, otherwise auto-detect from events
+	// Determine hours to show: use URL params if provided, otherwise use new calculation logic
 	let hoursToShow;
 	if (min_hour !== null && max_hour !== null) {
 		// User specified both min and max
@@ -375,8 +477,8 @@ function render5DayWeek(events) {
 		let maxH = parseInt(max_hour);
 		hoursToShow = Array.from({length: maxH - 8 + 1}, (_, i) => 8 + i);
 	} else {
-		// Auto-detect from events
-		hoursToShow = hoursWithEvents.size > 0 ? Array.from(hoursWithEvents).sort((a, b) => a - b) : Array.from({length: 12}, (_, i) => i + 8);
+		// Auto-detect from events using new logic: exactly 7 hours
+		hoursToShow = calculateHoursToShow(hoursWithEvents);
 	}
 
 	// Build header row (Hour label + Mon-Fri)

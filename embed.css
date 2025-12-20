@@ -67,6 +67,10 @@ body {
 	background: rgba(var(--theme-color-rgb), 0.15);
 }
 
+#week .week-half:last-of-type {
+	border-bottom: 2px solid var(--border-color);
+}
+
 #week th {
 	border-bottom: 2px solid var(--border-color);
 	text-align: center;
@@ -106,11 +110,27 @@ body {
 }
 
 #week td {
-	border: 2px solid var(--border-color);
+	border-top: 2px solid var(--border-color);
+	border-right: 2px solid var(--border-color);
+	border-bottom: none;
+	border-left: 2px solid var(--border-color);
 	vertical-align: top;
 	overflow: hidden;
 	text-align: center;
 	padding: 8px;
+}
+
+#week td:last-child {
+	border-right: 2px solid var(--border-color);
+}
+
+#week tr:last-child td {
+	border-bottom: 2px solid var(--border-color);
+}
+
+#week tr:last-child .week-hour-label,
+#week tr:last-child .week-half-label {
+	border-bottom: none;
 }
 
 #week .labels td {
