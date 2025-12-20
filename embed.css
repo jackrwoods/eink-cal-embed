@@ -83,6 +83,10 @@ body {
 	letter-spacing: 0.5px;
 }
 
+#week thead th:first-child {
+	background: var(--background-color);
+}
+
 #week .date {
 	display: block;
 	color: var(--text-color);
