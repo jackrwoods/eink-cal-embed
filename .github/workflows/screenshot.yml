@@ -15,6 +15,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Pull latest changes
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git pull origin master --force
+
       - name: Check if url.txt exists
         id: check-file
         run: |
@@ -81,16 +87,8 @@ jobs:
           name: calendar-screenshot
           path: calendar.png
 
-      - name: Commit screenshot
+      - name: Commit and push screenshot
         if: steps.check-file.outputs.exists == 'true'
         run: |
-          git config --local user.email "action@github.com"
-          git config --local user.name "GitHub Action"
           git add -A
-          git diff --quiet && git diff --staged --quiet || git commit -m "Update calendar screenshot"
-
-      - name: Push changes
-        if: steps.check-file.outputs.exists == 'true'
-        uses: ad-m/github-push-action@master
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+          git diff --quiet && git diff --staged --quiet || (git commit -m "Update calendar screenshot" && git push origin master)
