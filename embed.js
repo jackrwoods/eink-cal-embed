@@ -70,6 +70,18 @@ function getTodayInTimezone(tz) {
 	return date;
 }
 
+// Get current hour in the specified timezone
+function getCurrentHourInTimezone(tz) {
+	const formatter = new Intl.DateTimeFormat('en-US', {
+		timeZone: tz,
+		hour: '2-digit',
+		hour12: false
+	});
+	const parts = formatter.formatToParts(new Date());
+	const hour = parseInt(parts.find(p => p.type === 'hour').value);
+	return hour;
+}
+
 let today = getTodayInTimezone(timezone);
 let selectedDay = new Date(today.valueOf());
 let selectedView = default_view;
@@ -130,19 +142,26 @@ function selectDay(date, focus = true, events = null) {
 function calculateHoursToShow(hoursWithEvents) {
 	// Rules:
 	// 1. Always show exactly 7 hours
-	// 2. If no events, show 12-19 (7 hours)
-	// 3. If events span > 7 hours, skip gaps: show padding around first and last events
-	// 4. If too dense, show only 12-19 (noon onwards, 7 hours)
+	// 2. Minimum hour is the current hour (in selected timezone)
+	// 3. If no events, start from current hour and show 7 hours forward
+	// 4. If events exist, start from max(current hour, earliest event hour) and show 7 hours
+	// 5. If too dense, reduce hours if needed for height
+
+	const currentHour = getCurrentHourInTimezone(timezone);
 
 	if (hoursWithEvents.size === 0) {
-		// No events - show 12-19 (7 hours), but reduce if needed for height
-		let result = Array.from({length: 7}, (_, i) => 12 + i);
+		// No events - start from current hour and show 7 hours forward
+		let result = Array.from({length: 7}, (_, i) => currentHour + i);
 		return reduceHoursIfNeeded(result);
 	}
 
 	const sortedHours = Array.from(hoursWithEvents).sort((a, b) => a - b);
-	const minHour = sortedHours[0];
+	let minHour = sortedHours[0];
 	const maxHour = sortedHours[sortedHours.length - 1];
+
+	// Ensure minimum hour is at least current hour
+	minHour = Math.max(minHour, currentHour);
+
 	const hourSpan = maxHour - minHour;
 
 	if (hourSpan < 7) {
