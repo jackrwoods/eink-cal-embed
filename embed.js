@@ -171,7 +171,7 @@ function calculateHoursToShow(hoursWithEvents) {
 
 	// We have 7 hours total, minus space for at least the min and max hours = at most 5 hours of padding
 	const maxPaddingToUse = 5;
-	const paddingToUse = Math.min(maxPaddingAvailable, maxPaddingToUse);
+	const paddingToUse = Math.min(totalPaddingAvailable, maxPaddingToUse);
 
 	// Distribute padding proportionally before and after
 	let padBefore, padAfter;
