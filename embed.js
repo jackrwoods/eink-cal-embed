@@ -144,88 +144,15 @@ function calculateHoursToShow(hoursWithEvents) {
 	// 1. Always show exactly 7 hours
 	// 2. Minimum hour is the current hour (in selected timezone)
 	// 3. If no events, start from current hour and show 7 hours forward
-	// 4. If events exist, start from max(current hour, earliest event hour) and show 7 hours
-	// 5. If too dense, reduce hours if needed for height
+	// 4. If events exist, start from the current hour and show 7 hours forward
+	// 5. Skip empty hours - show all 7 hours regardless of whether they have events
 
 	const currentHour = getCurrentHourInTimezone(timezone);
 
-	if (hoursWithEvents.size === 0) {
-		// No events - start from current hour and show 7 hours forward
-		let result = Array.from({length: 7}, (_, i) => currentHour + i);
-		return reduceHoursIfNeeded(result);
-	}
+	// Always start from current hour and show next 7 hours
+	const hoursToShow = Array.from({length: 7}, (_, i) => currentHour + i);
 
-	const sortedHours = Array.from(hoursWithEvents).sort((a, b) => a - b);
-	let minHour = sortedHours[0];
-	const maxHour = sortedHours[sortedHours.length - 1];
-
-	// Ensure minimum hour is at least current hour
-	minHour = Math.max(minHour, currentHour);
-
-	const hourSpan = maxHour - minHour;
-
-	if (hourSpan < 7) {
-		// Events fit within 7 hours, show all hours between min and max
-		const result = Array.from({length: hourSpan + 1}, (_, i) => minHour + i);
-		// Pad to exactly 7 hours if needed
-		while (result.length < 7) {
-			if (result[result.length - 1] < 23) {
-				result.push(result[result.length - 1] + 1);
-			} else if (result[0] > 0) {
-				result.unshift(result[0] - 1);
-			} else {
-				break;
-			}
-		}
-		return result.slice(0, 7);
-	}
-
-	// Events span >= 7 hours - skip gaps between events
-	// Add padding around first and last events, distributing 7 total hours
-
-	// Calculate how much padding we can add before first event and after last event
-	const paddingBefore = minHour; // Max hours we can go back
-	const paddingAfter = 23 - maxHour; // Max hours we can go forward
-	const totalPaddingAvailable = paddingBefore + paddingAfter;
-
-	// We have 7 hours total, minus space for at least the min and max hours = at most 5 hours of padding
-	const maxPaddingToUse = 5;
-	const paddingToUse = Math.min(totalPaddingAvailable, maxPaddingToUse);
-
-	// Distribute padding proportionally before and after
-	let padBefore, padAfter;
-	if (totalPaddingAvailable === 0) {
-		padBefore = 0;
-		padAfter = 0;
-	} else {
-		padBefore = Math.floor((paddingBefore / totalPaddingAvailable) * paddingToUse);
-		padAfter = paddingToUse - padBefore;
-		// Adjust if we exceed available padding
-		padBefore = Math.min(padBefore, paddingBefore);
-		padAfter = Math.min(padAfter, paddingAfter);
-	}
-
-	const startHour = minHour - padBefore;
-	const endHour = maxHour + padAfter;
-	const result = Array.from({length: endHour - startHour + 1}, (_, i) => startHour + i);
-
-	// Ensure exactly 7 hours
-	if (result.length > 7) {
-		return result.slice(0, 7);
-	} else if (result.length < 7) {
-		// Pad to 7 hours
-		while (result.length < 7) {
-			if (result[result.length - 1] < 23) {
-				result.push(result[result.length - 1] + 1);
-			} else if (result[0] > 0) {
-				result.unshift(result[0] - 1);
-			} else {
-				break;
-			}
-		}
-	}
-
-	return reduceHoursIfNeeded(result.slice(0, 7));
+	return hoursToShow;
 }
 
 function reduceHoursIfNeeded(hours) {
