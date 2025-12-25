@@ -305,9 +305,10 @@ function renderWeek(events) {
 		let minH = parseInt(min_hour);
 		hoursToShow = Array.from({length: 20 - minH}, (_, i) => minH + i);
 	} else if (max_hour !== null) {
-		// User specified only max, go from 8am
+		// User specified only max, go from max(8am, current hour)
+		let minH = Math.max(8, getCurrentHourInTimezone(timezone));
 		let maxH = parseInt(max_hour);
-		hoursToShow = Array.from({length: maxH - 8 + 1}, (_, i) => 8 + i);
+		hoursToShow = Array.from({length: maxH - minH + 1}, (_, i) => minH + i);
 	} else {
 		// Auto-detect from events using new logic: exactly 7 hours
 		hoursToShow = calculateHoursToShow(hoursWithEvents);
@@ -492,9 +493,10 @@ function render5DayWeek(events) {
 		let minH = parseInt(min_hour);
 		hoursToShow = Array.from({length: 20 - minH}, (_, i) => minH + i);
 	} else if (max_hour !== null) {
-		// User specified only max, go from 8am
+		// User specified only max, go from max(8am, current hour)
+		let minH = Math.max(8, getCurrentHourInTimezone(timezone));
 		let maxH = parseInt(max_hour);
-		hoursToShow = Array.from({length: maxH - 8 + 1}, (_, i) => 8 + i);
+		hoursToShow = Array.from({length: maxH - minH + 1}, (_, i) => minH + i);
 	} else {
 		// Auto-detect from events using new logic: exactly 7 hours
 		hoursToShow = calculateHoursToShow(hoursWithEvents);
