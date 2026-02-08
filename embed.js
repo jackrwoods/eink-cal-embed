@@ -952,7 +952,10 @@ function parseCalendar(data) {
 
 		const meta = {
 			calname: comp.getFirstPropertyValue('x-wr-calname'),
-			timezone: new ICAL.Timezone(comp.getFirstSubcomponent('vtimezone')).tzid,
+			timezone: (() => {
+				const tz = comp.getFirstSubcomponent('vtimezone');
+				return tz ? new ICAL.Timezone(tz).tzid : null;
+			})(),
 			caldesc: comp.getFirstPropertyValue('x-wr-caldesc')
 		};
 
