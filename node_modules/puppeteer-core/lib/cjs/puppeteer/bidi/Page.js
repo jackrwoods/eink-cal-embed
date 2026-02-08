@@ -240,8 +240,8 @@ let BidiPage = (() => {
         resize(_params) {
             throw new Errors_js_1.UnsupportedOperation();
         }
-        windowId() {
-            throw new Errors_js_1.UnsupportedOperation();
+        async windowId() {
+            return this.#frame.browsingContext.windowId;
         }
         openDevTools() {
             throw new Errors_js_1.UnsupportedOperation();
@@ -771,6 +771,9 @@ let BidiPage = (() => {
         metrics() {
             throw new Errors_js_1.UnsupportedOperation();
         }
+        async captureHeapSnapshot(_options) {
+            throw new Errors_js_1.UnsupportedOperation();
+        }
         async goBack(options = {}) {
             return await this.#go(-1, options);
         }
@@ -929,14 +932,28 @@ function cdpSpecificCookiePropertiesFromPuppeteerToBidi(cookieParam, ...property
     return result;
 }
 function convertCookiesSameSiteBiDiToCdp(sameSite) {
-    return sameSite === 'strict' ? 'Strict' : sameSite === 'lax' ? 'Lax' : 'None';
+    switch (sameSite) {
+        case 'strict':
+            return 'Strict';
+        case 'lax':
+            return 'Lax';
+        case 'none':
+            return 'None';
+        default:
+            return 'Default';
+    }
 }
 function convertCookiesSameSiteCdpToBiDi(sameSite) {
-    return sameSite === 'Strict'
-        ? "strict" /* Bidi.Network.SameSite.Strict */
-        : sameSite === 'Lax'
-            ? "lax" /* Bidi.Network.SameSite.Lax */
-            : "none" /* Bidi.Network.SameSite.None */;
+    switch (sameSite) {
+        case 'Strict':
+            return "strict" /* Bidi.Network.SameSite.Strict */;
+        case 'Lax':
+            return "lax" /* Bidi.Network.SameSite.Lax */;
+        case 'None':
+            return "none" /* Bidi.Network.SameSite.None */;
+        default:
+            return "default" /* Bidi.Network.SameSite.Default */;
+    }
 }
 function convertCookiesExpiryCdpToBiDi(expiry) {
     return [undefined, -1].includes(expiry) ? undefined : expiry;

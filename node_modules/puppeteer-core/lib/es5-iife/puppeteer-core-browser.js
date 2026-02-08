@@ -3048,7 +3048,7 @@ var Puppeteer = function (exports, _PuppeteerURL, _LazyArg, _ARIAQueryHandler, _
    */
   // If moved update release-please config
   // x-release-please-start-version
-  const packageVersion = '24.36.1';
+  const packageVersion = '24.37.2';
   // x-release-please-end
 
   /**
@@ -3886,6 +3886,25 @@ var Puppeteer = function (exports, _PuppeteerURL, _LazyArg, _ARIAQueryHandler, _
      */
     async deleteMatchingCookies(...filters) {
       return await this.defaultBrowserContext().deleteMatchingCookies(...filters);
+    }
+    /**
+     * Sets the permission for a specific origin in the default
+     * {@link BrowserContext}.
+     *
+     * @remarks
+     *
+     * Shortcut for
+     * {@link BrowserContext.setPermission |
+     * browser.defaultBrowserContext().setPermission()}.
+     *
+     * @param origin - The origin to set the permission for.
+     * @param permission - The permission descriptor.
+     * @param state - The state of the permission.
+     *
+     * @public
+     */
+    async setPermission(origin, ...permissions) {
+      return await this.defaultBrowserContext().setPermission(origin, ...permissions);
     }
     /**
      * Whether Puppeteer is connected to this {@link Browser | browser}.
@@ -5103,7 +5122,7 @@ var Puppeteer = function (exports, _PuppeteerURL, _LazyArg, _ARIAQueryHandler, _
   }) => {
     return cssQuerySelectorAll(element, selector);
   });
-  const source = "\"use strict\";var g=Object.defineProperty;var X=Object.getOwnPropertyDescriptor;var B=Object.getOwnPropertyNames;var Y=Object.prototype.hasOwnProperty;var l=(t,e)=>{for(var r in e)g(t,r,{get:e[r],enumerable:!0})},G=(t,e,r,o)=>{if(e&&typeof e==\"object\"||typeof e==\"function\")for(let s of B(e))!Y.call(t,s)&&s!==r&&g(t,s,{get:()=>e[s],enumerable:!(o=X(e,s))||o.enumerable});return t};var J=t=>G(g({},\"__esModule\",{value:!0}),t);var pe={};l(pe,{default:()=>he});module.exports=J(pe);var N=class extends Error{constructor(e,r){super(e,r),this.name=this.constructor.name}get[Symbol.toStringTag](){return this.constructor.name}},p=class extends N{};var c=class t{static create(e){return new t(e)}static async race(e){let r=new Set;try{let o=e.map(s=>s instanceof t?(s.#s&&r.add(s),s.valueOrThrow()):s);return await Promise.race(o)}finally{for(let o of r)o.reject(new Error(\"Timeout cleared\"))}}#e=!1;#r=!1;#o;#t;#a=new Promise(e=>{this.#t=e});#s;#i;constructor(e){e&&e.timeout>0&&(this.#i=new p(e.message),this.#s=setTimeout(()=>{this.reject(this.#i)},e.timeout))}#l(e){clearTimeout(this.#s),this.#o=e,this.#t()}resolve(e){this.#r||this.#e||(this.#e=!0,this.#l(e))}reject(e){this.#r||this.#e||(this.#r=!0,this.#l(e))}resolved(){return this.#e}finished(){return this.#e||this.#r}value(){return this.#o}#n;valueOrThrow(){return this.#n||(this.#n=(async()=>{if(await this.#a,this.#r)throw this.#o;return this.#o})()),this.#n}};var L=new Map,W=t=>{let e=L.get(t);return e||(e=new Function(`return ${t}`)(),L.set(t,e),e)};var b={};l(b,{ariaQuerySelector:()=>z,ariaQuerySelectorAll:()=>x});var z=(t,e)=>globalThis.__ariaQuerySelector(t,e),x=async function*(t,e){yield*await globalThis.__ariaQuerySelectorAll(t,e)};var E={};l(E,{cssQuerySelector:()=>K,cssQuerySelectorAll:()=>Z});var K=(t,e)=>t.querySelector(e),Z=function(t,e){return t.querySelectorAll(e)};var A={};l(A,{customQuerySelectors:()=>P});var v=class{#e=new Map;register(e,r){if(!r.queryOne&&r.queryAll){let o=r.queryAll;r.queryOne=(s,i)=>{for(let n of o(s,i))return n;return null}}else if(r.queryOne&&!r.queryAll){let o=r.queryOne;r.queryAll=(s,i)=>{let n=o(s,i);return n?[n]:[]}}else if(!r.queryOne||!r.queryAll)throw new Error(\"At least one query method must be defined.\");this.#e.set(e,{querySelector:r.queryOne,querySelectorAll:r.queryAll})}unregister(e){this.#e.delete(e)}get(e){return this.#e.get(e)}clear(){this.#e.clear()}},P=new v;var R={};l(R,{pierceQuerySelector:()=>ee,pierceQuerySelectorAll:()=>te});var ee=(t,e)=>{let r=null,o=s=>{let i=document.createTreeWalker(s,NodeFilter.SHOW_ELEMENT);do{let n=i.currentNode;n.shadowRoot&&o(n.shadowRoot),!(n instanceof ShadowRoot)&&n!==s&&!r&&n.matches(e)&&(r=n)}while(!r&&i.nextNode())};return t instanceof Document&&(t=t.documentElement),o(t),r},te=(t,e)=>{let r=[],o=s=>{let i=document.createTreeWalker(s,NodeFilter.SHOW_ELEMENT);do{let n=i.currentNode;n.shadowRoot&&o(n.shadowRoot),!(n instanceof ShadowRoot)&&n!==s&&n.matches(e)&&r.push(n)}while(i.nextNode())};return t instanceof Document&&(t=t.documentElement),o(t),r};var u=(t,e)=>{if(!t)throw new Error(e)};var y=class{#e;#r;#o;#t;constructor(e,r){this.#e=e,this.#r=r}async start(){let e=this.#t=c.create(),r=await this.#e();if(r){e.resolve(r);return}this.#o=new MutationObserver(async()=>{let o=await this.#e();o&&(e.resolve(o),await this.stop())}),this.#o.observe(this.#r,{childList:!0,subtree:!0,attributes:!0})}async stop(){u(this.#t,\"Polling never started.\"),this.#t.finished()||this.#t.reject(new Error(\"Polling stopped\")),this.#o&&(this.#o.disconnect(),this.#o=void 0)}result(){return u(this.#t,\"Polling never started.\"),this.#t.valueOrThrow()}},w=class{#e;#r;constructor(e){this.#e=e}async start(){let e=this.#r=c.create(),r=await this.#e();if(r){e.resolve(r);return}let o=async()=>{if(e.finished())return;let s=await this.#e();if(!s){window.requestAnimationFrame(o);return}e.resolve(s),await this.stop()};window.requestAnimationFrame(o)}async stop(){u(this.#r,\"Polling never started.\"),this.#r.finished()||this.#r.reject(new Error(\"Polling stopped\"))}result(){return u(this.#r,\"Polling never started.\"),this.#r.valueOrThrow()}},T=class{#e;#r;#o;#t;constructor(e,r){this.#e=e,this.#r=r}async start(){let e=this.#t=c.create(),r=await this.#e();if(r){e.resolve(r);return}this.#o=setInterval(async()=>{let o=await this.#e();o&&(e.resolve(o),await this.stop())},this.#r)}async stop(){u(this.#t,\"Polling never started.\"),this.#t.finished()||this.#t.reject(new Error(\"Polling stopped\")),this.#o&&(clearInterval(this.#o),this.#o=void 0)}result(){return u(this.#t,\"Polling never started.\"),this.#t.valueOrThrow()}};var _={};l(_,{PCombinator:()=>H,pQuerySelector:()=>fe,pQuerySelectorAll:()=>$});var a=class{static async*map(e,r){for await(let o of e)yield await r(o)}static async*flatMap(e,r){for await(let o of e)yield*r(o)}static async collect(e){let r=[];for await(let o of e)r.push(o);return r}static async first(e){for await(let r of e)return r}};var C={};l(C,{textQuerySelectorAll:()=>m});var re=new Set([\"checkbox\",\"image\",\"radio\"]),oe=t=>t instanceof HTMLSelectElement||t instanceof HTMLTextAreaElement||t instanceof HTMLInputElement&&!re.has(t.type),se=new Set([\"SCRIPT\",\"STYLE\"]),f=t=>!se.has(t.nodeName)&&!document.head?.contains(t),I=new WeakMap,F=t=>{for(;t;)I.delete(t),t instanceof ShadowRoot?t=t.host:t=t.parentNode},j=new WeakSet,ne=new MutationObserver(t=>{for(let e of t)F(e.target)}),d=t=>{let e=I.get(t);if(e||(e={full:\"\",immediate:[]},!f(t)))return e;let r=\"\";if(oe(t))e.full=t.value,e.immediate.push(t.value),t.addEventListener(\"input\",o=>{F(o.target)},{once:!0,capture:!0});else{for(let o=t.firstChild;o;o=o.nextSibling){if(o.nodeType===Node.TEXT_NODE){e.full+=o.nodeValue??\"\",r+=o.nodeValue??\"\";continue}r&&e.immediate.push(r),r=\"\",o.nodeType===Node.ELEMENT_NODE&&(e.full+=d(o).full)}r&&e.immediate.push(r),t instanceof Element&&t.shadowRoot&&(e.full+=d(t.shadowRoot).full),j.has(t)||(ne.observe(t,{childList:!0,characterData:!0,subtree:!0}),j.add(t))}return I.set(t,e),e};var m=function*(t,e){let r=!1;for(let o of t.childNodes)if(o instanceof Element&&f(o)){let s;o.shadowRoot?s=m(o.shadowRoot,e):s=m(o,e);for(let i of s)yield i,r=!0}r||t instanceof Element&&f(t)&&d(t).full.includes(e)&&(yield t)};var k={};l(k,{checkVisibility:()=>le,pierce:()=>S,pierceAll:()=>O});var ie=[\"hidden\",\"collapse\"],le=(t,e)=>{if(!t)return e===!1;if(e===void 0)return t;let r=t.nodeType===Node.TEXT_NODE?t.parentElement:t,o=window.getComputedStyle(r),s=o&&!ie.includes(o.visibility)&&!ae(r);return e===s?t:!1};function ae(t){let e=t.getBoundingClientRect();return e.width===0||e.height===0}var ce=t=>\"shadowRoot\"in t&&t.shadowRoot instanceof ShadowRoot;function*S(t){ce(t)?yield t.shadowRoot:yield t}function*O(t){t=S(t).next().value,yield t;let e=[document.createTreeWalker(t,NodeFilter.SHOW_ELEMENT)];for(let r of e){let o;for(;o=r.nextNode();)o.shadowRoot&&(yield o.shadowRoot,e.push(document.createTreeWalker(o.shadowRoot,NodeFilter.SHOW_ELEMENT)))}}var D={};l(D,{xpathQuerySelectorAll:()=>q});var q=function*(t,e,r=-1){let s=(t.ownerDocument||document).evaluate(e,t,null,XPathResult.ORDERED_NODE_ITERATOR_TYPE),i=[],n;for(;(n=s.iterateNext())&&(i.push(n),!(r&&i.length===r)););for(let h=0;h<i.length;h++)n=i[h],yield n,delete i[h]};var ue=/[-\\w\\P{ASCII}*]/u,H=(r=>(r.Descendent=\">>>\",r.Child=\">>>>\",r))(H||{}),V=t=>\"querySelectorAll\"in t,Q=class{#e;#r=[];#o=void 0;elements;constructor(e,r){this.elements=[e],this.#e=r,this.#t()}async run(){for(typeof this.#o==\"string\"&&this.#o.trimStart()===\":scope\"&&this.#t();this.#o!==void 0;this.#t()){let e=this.#o;typeof e==\"string\"?e[0]&&ue.test(e[0])?this.elements=a.flatMap(this.elements,async function*(r){V(r)&&(yield*r.querySelectorAll(e))}):this.elements=a.flatMap(this.elements,async function*(r){if(!r.parentElement){if(!V(r))return;yield*r.querySelectorAll(e);return}let o=0;for(let s of r.parentElement.children)if(++o,s===r)break;yield*r.parentElement.querySelectorAll(`:scope>:nth-child(${o})${e}`)}):this.elements=a.flatMap(this.elements,async function*(r){switch(e.name){case\"text\":yield*m(r,e.value);break;case\"xpath\":yield*q(r,e.value);break;case\"aria\":yield*x(r,e.value);break;default:let o=P.get(e.name);if(!o)throw new Error(`Unknown selector type: ${e.name}`);yield*o.querySelectorAll(r,e.value)}})}}#t(){if(this.#r.length!==0){this.#o=this.#r.shift();return}if(this.#e.length===0){this.#o=void 0;return}let e=this.#e.shift();switch(e){case\">>>>\":{this.elements=a.flatMap(this.elements,S),this.#t();break}case\">>>\":{this.elements=a.flatMap(this.elements,O),this.#t();break}default:this.#r=e,this.#t();break}}},M=class{#e=new WeakMap;calculate(e,r=[]){if(e===null)return r;e instanceof ShadowRoot&&(e=e.host);let o=this.#e.get(e);if(o)return[...o,...r];let s=0;for(let n=e.previousSibling;n;n=n.previousSibling)++s;let i=this.calculate(e.parentNode,[s]);return this.#e.set(e,i),[...i,...r]}},U=(t,e)=>{if(t.length+e.length===0)return 0;let[r=-1,...o]=t,[s=-1,...i]=e;return r===s?U(o,i):r<s?-1:1},de=async function*(t){let e=new Set;for await(let o of t)e.add(o);let r=new M;yield*[...e.values()].map(o=>[o,r.calculate(o)]).sort(([,o],[,s])=>U(o,s)).map(([o])=>o)},$=function(t,e){let r=JSON.parse(e);if(r.some(o=>{let s=0;return o.some(i=>(typeof i==\"string\"?++s:s=0,s>1))}))throw new Error(\"Multiple deep combinators found in sequence.\");return de(a.flatMap(r,o=>{let s=new Q(t,o);return s.run(),s.elements}))},fe=async function(t,e){for await(let r of $(t,e))return r;return null};var me=Object.freeze({...b,...A,...R,..._,...C,...k,...D,...E,Deferred:c,createFunction:W,createTextContent:d,IntervalPoller:T,isSuitableNodeForTextMatching:f,MutationPoller:y,RAFPoller:w}),he=me;\n";
+  const source = "\"use strict\";var g=Object.defineProperty;var X=Object.getOwnPropertyDescriptor;var B=Object.getOwnPropertyNames;var Y=Object.prototype.hasOwnProperty;var l=(t,e)=>{for(var r in e)g(t,r,{get:e[r],enumerable:!0})},G=(t,e,r,o)=>{if(e&&typeof e==\"object\"||typeof e==\"function\")for(let s of B(e))!Y.call(t,s)&&s!==r&&g(t,s,{get:()=>e[s],enumerable:!(o=X(e,s))||o.enumerable});return t};var J=t=>G(g({},\"__esModule\",{value:!0}),t);var pe={};l(pe,{default:()=>he});module.exports=J(pe);var N=class extends Error{constructor(e,r){super(e,r),this.name=this.constructor.name}get[Symbol.toStringTag](){return this.constructor.name}},p=class extends N{};var c=class t{static create(e){return new t(e)}static async race(e){let r=new Set;try{let o=e.map(s=>s instanceof t?(s.#s&&r.add(s),s.valueOrThrow()):s);return await Promise.race(o)}finally{for(let o of r)o.reject(new Error(\"Timeout cleared\"))}}#e=!1;#r=!1;#o;#t;#a=new Promise(e=>{this.#t=e});#s;#i;constructor(e){e&&e.timeout>0&&(this.#i=new p(e.message),this.#s=setTimeout(()=>{this.reject(this.#i)},e.timeout))}#l(e){clearTimeout(this.#s),this.#o=e,this.#t()}resolve(e){this.#r||this.#e||(this.#e=!0,this.#l(e))}reject(e){this.#r||this.#e||(this.#r=!0,this.#l(e))}resolved(){return this.#e}finished(){return this.#e||this.#r}value(){return this.#o}#n;valueOrThrow(){return this.#n||(this.#n=(async()=>{if(await this.#a,this.#r)throw this.#o;return this.#o})()),this.#n}};var L=new Map,W=t=>{let e=L.get(t);return e||(e=new Function(`return ${t}`)(),L.set(t,e),e)};var b={};l(b,{ariaQuerySelector:()=>z,ariaQuerySelectorAll:()=>x});var z=(t,e)=>globalThis.__ariaQuerySelector(t,e),x=async function*(t,e){yield*await globalThis.__ariaQuerySelectorAll(t,e)};var E={};l(E,{cssQuerySelector:()=>K,cssQuerySelectorAll:()=>Z});var K=(t,e)=>t.querySelector(e),Z=function(t,e){return t.querySelectorAll(e)};var A={};l(A,{customQuerySelectors:()=>P});var v=class{#e=new Map;register(e,r){if(!r.queryOne&&r.queryAll){let o=r.queryAll;r.queryOne=(s,i)=>{for(let n of o(s,i))return n;return null}}else if(r.queryOne&&!r.queryAll){let o=r.queryOne;r.queryAll=(s,i)=>{let n=o(s,i);return n?[n]:[]}}else if(!r.queryOne||!r.queryAll)throw new Error(\"At least one query method must be defined.\");this.#e.set(e,{querySelector:r.queryOne,querySelectorAll:r.queryAll})}unregister(e){this.#e.delete(e)}get(e){return this.#e.get(e)}clear(){this.#e.clear()}},P=new v;var R={};l(R,{pierceQuerySelector:()=>ee,pierceQuerySelectorAll:()=>te});var ee=(t,e)=>{let r=null,o=s=>{let i=document.createTreeWalker(s,NodeFilter.SHOW_ELEMENT);do{let n=i.currentNode;n.shadowRoot&&o(n.shadowRoot),!(n instanceof ShadowRoot)&&n!==s&&!r&&n.matches(e)&&(r=n)}while(!r&&i.nextNode())};return t instanceof Document&&(t=t.documentElement),o(t),r},te=(t,e)=>{let r=[],o=s=>{let i=document.createTreeWalker(s,NodeFilter.SHOW_ELEMENT);do{let n=i.currentNode;n.shadowRoot&&o(n.shadowRoot),!(n instanceof ShadowRoot)&&n!==s&&n.matches(e)&&r.push(n)}while(i.nextNode())};return t instanceof Document&&(t=t.documentElement),o(t),r};var u=(t,e)=>{if(!t)throw new Error(e)};var y=class{#e;#r;#o;#t;constructor(e,r){this.#e=e,this.#r=r}async start(){let e=this.#t=c.create(),r=await this.#e();if(r){e.resolve(r);return}this.#o=new MutationObserver(async()=>{let o=await this.#e();o&&(e.resolve(o),await this.stop())}),this.#o.observe(this.#r,{childList:!0,subtree:!0,attributes:!0})}async stop(){u(this.#t,\"Polling never started.\"),this.#t.finished()||this.#t.reject(new Error(\"Polling stopped\")),this.#o&&(this.#o.disconnect(),this.#o=void 0)}result(){return u(this.#t,\"Polling never started.\"),this.#t.valueOrThrow()}},w=class{#e;#r;constructor(e){this.#e=e}async start(){let e=this.#r=c.create(),r=await this.#e();if(r){e.resolve(r);return}let o=async()=>{if(e.finished())return;let s=await this.#e();if(!s){window.requestAnimationFrame(o);return}e.resolve(s),await this.stop()};window.requestAnimationFrame(o)}async stop(){u(this.#r,\"Polling never started.\"),this.#r.finished()||this.#r.reject(new Error(\"Polling stopped\"))}result(){return u(this.#r,\"Polling never started.\"),this.#r.valueOrThrow()}},T=class{#e;#r;#o;#t;constructor(e,r){this.#e=e,this.#r=r}async start(){let e=this.#t=c.create(),r=await this.#e();if(r){e.resolve(r);return}this.#o=setInterval(async()=>{let o=await this.#e();o&&(e.resolve(o),await this.stop())},this.#r)}async stop(){u(this.#t,\"Polling never started.\"),this.#t.finished()||this.#t.reject(new Error(\"Polling stopped\")),this.#o&&(clearInterval(this.#o),this.#o=void 0)}result(){return u(this.#t,\"Polling never started.\"),this.#t.valueOrThrow()}};var _={};l(_,{PCombinator:()=>H,pQuerySelector:()=>fe,pQuerySelectorAll:()=>$});var a=class{static async*map(e,r){for await(let o of e)yield await r(o)}static async*flatMap(e,r){for await(let o of e)yield*r(o)}static async collect(e){let r=[];for await(let o of e)r.push(o);return r}static async first(e){for await(let r of e)return r}};var C={};l(C,{textQuerySelectorAll:()=>m});var re=new Set([\"checkbox\",\"image\",\"radio\"]),oe=t=>t instanceof HTMLSelectElement||t instanceof HTMLTextAreaElement||t instanceof HTMLInputElement&&!re.has(t.type),se=new Set([\"SCRIPT\",\"STYLE\"]),f=t=>!se.has(t.nodeName)&&!document.head?.contains(t),I=new WeakMap,F=t=>{for(;t;)I.delete(t),t instanceof ShadowRoot?t=t.host:t=t.parentNode},j=new WeakSet,ne=new MutationObserver(t=>{for(let e of t)F(e.target)}),d=t=>{let e=I.get(t);if(e||(e={full:\"\",immediate:[]},!f(t)))return e;let r=\"\";if(oe(t))e.full=t.value,e.immediate.push(t.value),t.addEventListener(\"input\",o=>{F(o.target)},{once:!0,capture:!0});else{for(let o=t.firstChild;o;o=o.nextSibling){if(o.nodeType===Node.TEXT_NODE){e.full+=o.nodeValue??\"\",r+=o.nodeValue??\"\";continue}r&&e.immediate.push(r),r=\"\",o.nodeType===Node.ELEMENT_NODE&&(e.full+=d(o).full)}r&&e.immediate.push(r),t instanceof Element&&t.shadowRoot&&(e.full+=d(t.shadowRoot).full),j.has(t)||(ne.observe(t,{childList:!0,characterData:!0,subtree:!0}),j.add(t))}return I.set(t,e),e};var m=function*(t,e){let r=!1;for(let o of t.childNodes)if(o instanceof Element&&f(o)){let s;o.shadowRoot?s=m(o.shadowRoot,e):s=m(o,e);for(let i of s)yield i,r=!0}r||t instanceof Element&&f(t)&&d(t).full.includes(e)&&(yield t)};var k={};l(k,{checkVisibility:()=>le,pierce:()=>S,pierceAll:()=>O});var ie=[\"hidden\",\"collapse\"],le=(t,e)=>{if(!t)return e===!1;if(e===void 0)return t;let r=t.nodeType===Node.TEXT_NODE?t.parentElement:t,o=window.getComputedStyle(r),s=o&&!ie.includes(o.visibility)&&!ae(r);return e===s?t:!1};function ae(t){let e=t.getBoundingClientRect();return e.width===0||e.height===0}var ce=t=>\"shadowRoot\"in t&&t.shadowRoot instanceof ShadowRoot;function*S(t){ce(t)?yield t.shadowRoot:yield t}function*O(t){t=S(t).next().value,yield t;let e=[document.createTreeWalker(t,NodeFilter.SHOW_ELEMENT)];for(let r of e){let o;for(;o=r.nextNode();)o.shadowRoot&&(yield o.shadowRoot,e.push(document.createTreeWalker(o.shadowRoot,NodeFilter.SHOW_ELEMENT)))}}var D={};l(D,{xpathQuerySelectorAll:()=>q});var q=function*(t,e,r=-1){let s=(t.ownerDocument||document).evaluate(e,t,null,XPathResult.ORDERED_NODE_ITERATOR_TYPE),i=[],n;for(;(n=s.iterateNext())&&(i.push(n),!(r&&i.length===r)););for(let h=0;h<i.length;h++)n=i[h],yield n,i[h]=null};var ue=/[-\\w\\P{ASCII}*]/u,H=(r=>(r.Descendent=\">>>\",r.Child=\">>>>\",r))(H||{}),V=t=>\"querySelectorAll\"in t,Q=class{#e;#r=[];#o=void 0;elements;constructor(e,r){this.elements=[e],this.#e=r,this.#t()}async run(){for(typeof this.#o==\"string\"&&this.#o.trimStart()===\":scope\"&&this.#t();this.#o!==void 0;this.#t()){let e=this.#o;typeof e==\"string\"?e[0]&&ue.test(e[0])?this.elements=a.flatMap(this.elements,async function*(r){V(r)&&(yield*r.querySelectorAll(e))}):this.elements=a.flatMap(this.elements,async function*(r){if(!r.parentElement){if(!V(r))return;yield*r.querySelectorAll(e);return}let o=0;for(let s of r.parentElement.children)if(++o,s===r)break;yield*r.parentElement.querySelectorAll(`:scope>:nth-child(${o})${e}`)}):this.elements=a.flatMap(this.elements,async function*(r){switch(e.name){case\"text\":yield*m(r,e.value);break;case\"xpath\":yield*q(r,e.value);break;case\"aria\":yield*x(r,e.value);break;default:let o=P.get(e.name);if(!o)throw new Error(`Unknown selector type: ${e.name}`);yield*o.querySelectorAll(r,e.value)}})}}#t(){if(this.#r.length!==0){this.#o=this.#r.shift();return}if(this.#e.length===0){this.#o=void 0;return}let e=this.#e.shift();switch(e){case\">>>>\":{this.elements=a.flatMap(this.elements,S),this.#t();break}case\">>>\":{this.elements=a.flatMap(this.elements,O),this.#t();break}default:this.#r=e,this.#t();break}}},M=class{#e=new WeakMap;calculate(e,r=[]){if(e===null)return r;e instanceof ShadowRoot&&(e=e.host);let o=this.#e.get(e);if(o)return[...o,...r];let s=0;for(let n=e.previousSibling;n;n=n.previousSibling)++s;let i=this.calculate(e.parentNode,[s]);return this.#e.set(e,i),[...i,...r]}},U=(t,e)=>{if(t.length+e.length===0)return 0;let[r=-1,...o]=t,[s=-1,...i]=e;return r===s?U(o,i):r<s?-1:1},de=async function*(t){let e=new Set;for await(let o of t)e.add(o);let r=new M;yield*[...e.values()].map(o=>[o,r.calculate(o)]).sort(([,o],[,s])=>U(o,s)).map(([o])=>o)},$=function(t,e){let r=JSON.parse(e);if(r.some(o=>{let s=0;return o.some(i=>(typeof i==\"string\"?++s:s=0,s>1))}))throw new Error(\"Multiple deep combinators found in sequence.\");return de(a.flatMap(r,o=>{let s=new Q(t,o);return s.run(),s.elements}))},fe=async function(t,e){for await(let r of $(t,e))return r;return null};var me=Object.freeze({...b,...A,...R,..._,...C,...k,...D,...E,Deferred:c,createFunction:W,createTextContent:d,IntervalPoller:T,isSuitableNodeForTextMatching:f,MutationPoller:y,RAFPoller:w}),he=me;\n";
 
   /**
    * @license
@@ -6580,6 +6599,7 @@ var Puppeteer = function (exports, _PuppeteerURL, _LazyArg, _ARIAQueryHandler, _
   }
   function _fill(value, options) {
     const signal = options?.signal;
+    const typingThreshold = options?.typingThreshold ?? 100;
     const cause = new Error('Locator.fill');
     return this._wait(options).pipe(this.operators.conditions([_classPrivateFieldGet(_ensureElementIsInTheViewportIfNeeded, this), _classPrivateFieldGet(_waitForStableBoundingBoxIfNeeded, this), _classPrivateFieldGet(_waitForEnabledIfNeeded, this)], signal), tap(() => {
       return this.emit(exports.LocatorEvent.Action, undefined);
@@ -6603,49 +6623,67 @@ var Puppeteer = function (exports, _PuppeteerURL, _LazyArg, _ARIAQueryHandler, _
         }
         return 'unknown';
       })).pipe(mergeMap(inputType => {
+        const fillDirectly = () => {
+          return from(handle.focus()).pipe(mergeMap(() => {
+            return from(handle.evaluate((input, newValue) => {
+              const element = input;
+              const currentValue = element.isContentEditable ? element.innerText : element.value;
+              if (currentValue === newValue) {
+                return;
+              }
+              if (element.isContentEditable) {
+                element.innerText = newValue;
+              } else {
+                element.value = newValue;
+              }
+              element.dispatchEvent(new Event('input', {
+                bubbles: true
+              }));
+              element.dispatchEvent(new Event('change', {
+                bubbles: true
+              }));
+            }, value));
+          }));
+        };
         switch (inputType) {
           case 'select':
             return from(handle.select(value).then(noop));
           case 'contenteditable':
           case 'typeable-input':
-            return from(handle.evaluate((input, newValue) => {
-              const currentValue = input.isContentEditable ? input.innerText : input.value;
-              // Clear the input if the current value does not match the filled
-              // out value.
-              if (newValue.length <= currentValue.length || !newValue.startsWith(input.value)) {
-                if (input.isContentEditable) {
-                  input.innerText = '';
+            if (value.length < typingThreshold) {
+              return from(handle.evaluate((input, newValue) => {
+                const element = input;
+                const currentValue = element.isContentEditable ? element.innerText : input.value;
+                // Clear the input if the current value does not match the filled
+                // out value.
+                if (newValue.length <= currentValue.length || !newValue.startsWith(currentValue)) {
+                  if (element.isContentEditable) {
+                    element.innerText = '';
+                  } else {
+                    input.value = '';
+                  }
+                  return newValue;
+                }
+                // If the value is partially filled out, only type the rest. Move
+                // cursor to the end of the common prefix.
+                if (element.isContentEditable) {
+                  element.innerText = '';
+                  element.innerText = currentValue;
                 } else {
                   input.value = '';
+                  input.value = currentValue;
                 }
-                return newValue;
-              }
-              const originalValue = input.isContentEditable ? input.innerText : input.value;
-              // If the value is partially filled out, only type the rest. Move
-              // cursor to the end of the common prefix.
-              if (input.isContentEditable) {
-                input.innerText = '';
-                input.innerText = originalValue;
-              } else {
-                input.value = '';
-                input.value = originalValue;
-              }
-              return newValue.substring(originalValue.length);
-            }, value)).pipe(mergeMap(textToType => {
-              return from(handle.type(textToType));
-            }));
+                return newValue.substring(currentValue.length);
+              }, value)).pipe(mergeMap(textToType => {
+                if (!textToType) {
+                  return of(undefined);
+                }
+                return from(handle.type(textToType));
+              }));
+            }
+            return fillDirectly();
           case 'other-input':
-            return from(handle.focus()).pipe(mergeMap(() => {
-              return from(handle.evaluate((input, value) => {
-                input.value = value;
-                input.dispatchEvent(new Event('input', {
-                  bubbles: true
-                }));
-                input.dispatchEvent(new Event('change', {
-                  bubbles: true
-                }));
-              }, value));
-            }));
+            return fillDirectly();
           case 'unknown':
             throw new Error(`Element cannot be filled out.`);
         }
@@ -9231,7 +9269,7 @@ var Puppeteer = function (exports, _PuppeteerURL, _LazyArg, _ARIAQueryHandler, _
        * ```
        *
        * @param pageFunction - the function to evaluate in the frame context.
-       * @param options - options to configure the polling method and timeout.
+       * @param options - options to configure the polling method, timeout and signal.
        * @param args - arguments to pass to the `pageFunction`.
        * @returns the promise which resolve when the `pageFunction` returns a truthy value.
        */
@@ -11279,6 +11317,8 @@ var Puppeteer = function (exports, _PuppeteerURL, _LazyArg, _ARIAQueryHandler, _
        * - `timeout`: Maximum wait time in milliseconds, defaults to `30` seconds, pass
        *   `0` to disable the timeout. The default value can be changed by using the
        *   {@link Page.setDefaultTimeout} method.
+       *
+       * - `signal`: A signal object that allows you to cancel a waitForRequest call.
        */
       waitForRequest(urlOrPredicate, options = {}) {
         const {
@@ -11322,6 +11362,8 @@ var Puppeteer = function (exports, _PuppeteerURL, _LazyArg, _ARIAQueryHandler, _
        * - `timeout`: Maximum wait time in milliseconds, defaults to `30` seconds,
        *   pass `0` to disable the timeout. The default value can be changed by using
        *   the {@link Page.setDefaultTimeout} method.
+       *
+       * - `signal`: A signal object that allows you to cancel a waitForResponse call.
        */
       waitForResponse(urlOrPredicate, options = {}) {
         const {
@@ -12004,6 +12046,8 @@ var Puppeteer = function (exports, _PuppeteerURL, _LazyArg, _ARIAQueryHandler, _
        * - `timeout`: maximum time to wait for in milliseconds. Defaults to `30000`
        *   (30 seconds). Pass `0` to disable timeout. The default value can be changed
        *   by using the {@link Page.setDefaultTimeout} method.
+       *
+       * - `signal`: A signal object that allows you to cancel a waitForSelector call.
        */
       async waitForSelector(selector, options = {}) {
         return await this.mainFrame().waitForSelector(selector, options);
@@ -12838,8 +12882,15 @@ var Puppeteer = function (exports, _PuppeteerURL, _LazyArg, _ARIAQueryHandler, _
   var _editable = /*#__PURE__*/new WeakMap();
   var _focusable = /*#__PURE__*/new WeakMap();
   var _hidden = /*#__PURE__*/new WeakMap();
+  var _busy = /*#__PURE__*/new WeakMap();
+  var _modal = /*#__PURE__*/new WeakMap();
+  var _hasErrormessage = /*#__PURE__*/new WeakMap();
+  var _hasDetails = /*#__PURE__*/new WeakMap();
   var _name = /*#__PURE__*/new WeakMap();
   var _role = /*#__PURE__*/new WeakMap();
+  var _description = /*#__PURE__*/new WeakMap();
+  var _roledescription = /*#__PURE__*/new WeakMap();
+  var _live = /*#__PURE__*/new WeakMap();
   var _ignored = /*#__PURE__*/new WeakMap();
   var _cachedHasFocusableChild = /*#__PURE__*/new WeakMap();
   var _realm2 = /*#__PURE__*/new WeakMap();
@@ -12854,15 +12905,23 @@ var Puppeteer = function (exports, _PuppeteerURL, _LazyArg, _ARIAQueryHandler, _
       _classPrivateFieldInitSpec(this, _editable, false);
       _classPrivateFieldInitSpec(this, _focusable, false);
       _classPrivateFieldInitSpec(this, _hidden, false);
+      _classPrivateFieldInitSpec(this, _busy, false);
+      _classPrivateFieldInitSpec(this, _modal, false);
+      _classPrivateFieldInitSpec(this, _hasErrormessage, false);
+      _classPrivateFieldInitSpec(this, _hasDetails, false);
       _classPrivateFieldInitSpec(this, _name, void 0);
       _classPrivateFieldInitSpec(this, _role, void 0);
+      _classPrivateFieldInitSpec(this, _description, void 0);
+      _classPrivateFieldInitSpec(this, _roledescription, void 0);
+      _classPrivateFieldInitSpec(this, _live, void 0);
       _classPrivateFieldInitSpec(this, _ignored, void 0);
       _classPrivateFieldInitSpec(this, _cachedHasFocusableChild, void 0);
       _classPrivateFieldInitSpec(this, _realm2, void 0);
       this.payload = payload;
-      _classPrivateFieldSet(_name, this, this.payload.name ? this.payload.name.value : '');
       _classPrivateFieldSet(_role, this, this.payload.role ? this.payload.role.value : 'Unknown');
       _classPrivateFieldSet(_ignored, this, this.payload.ignored);
+      _classPrivateFieldSet(_name, this, this.payload.name ? this.payload.name.value : '');
+      _classPrivateFieldSet(_description, this, this.payload.description ? this.payload.description.value : undefined);
       _classPrivateFieldSet(_realm2, this, realm);
       for (const property of this.payload.properties || []) {
         if (property.name === 'editable') {
@@ -12874,6 +12933,24 @@ var Puppeteer = function (exports, _PuppeteerURL, _LazyArg, _ARIAQueryHandler, _
         }
         if (property.name === 'hidden') {
           _classPrivateFieldSet(_hidden, this, property.value.value);
+        }
+        if (property.name === 'busy') {
+          _classPrivateFieldSet(_busy, this, property.value.value);
+        }
+        if (property.name === 'live') {
+          _classPrivateFieldSet(_live, this, property.value.value);
+        }
+        if (property.name === 'modal') {
+          _classPrivateFieldSet(_modal, this, property.value.value);
+        }
+        if (property.name === 'roledescription') {
+          _classPrivateFieldSet(_roledescription, this, property.value.value);
+        }
+        if (property.name === 'errormessage') {
+          _classPrivateFieldSet(_hasErrormessage, this, true);
+        }
+        if (property.name === 'details') {
+          _classPrivateFieldSet(_hasDetails, this, true);
         }
       }
     }
@@ -12975,7 +13052,7 @@ var Puppeteer = function (exports, _PuppeteerURL, _LazyArg, _ARIAQueryHandler, _
       if (this.isLandmark()) {
         return true;
       }
-      if (_classPrivateFieldGet(_focusable, this) || _classPrivateFieldGet(_richlyEditable, this)) {
+      if (_classPrivateFieldGet(_focusable, this) || _classPrivateFieldGet(_richlyEditable, this) || _classPrivateFieldGet(_busy, this) || _classPrivateFieldGet(_live, this) && _classPrivateFieldGet(_live, this) !== 'off' || _classPrivateFieldGet(_modal, this) || _classPrivateFieldGet(_hasErrormessage, this) || _classPrivateFieldGet(_hasDetails, this) || _classPrivateFieldGet(_roledescription, this)) {
         return true;
       }
       // If it's not focusable but has a control role, then it's interesting.
@@ -12986,7 +13063,7 @@ var Puppeteer = function (exports, _PuppeteerURL, _LazyArg, _ARIAQueryHandler, _
       if (insideControl) {
         return false;
       }
-      return this.isLeafNode() && !!_classPrivateFieldGet(_name, this);
+      return this.isLeafNode() && (!!_classPrivateFieldGet(_name, this) || !!_classPrivateFieldGet(_description, this));
     }
     serialize() {
       const properties = new Map();
@@ -13042,9 +13119,9 @@ var Puppeteer = function (exports, _PuppeteerURL, _LazyArg, _ARIAQueryHandler, _
         }
         node[userStringProperty] = getUserStringPropertyValue(userStringProperty);
       }
-      const booleanProperties = ['disabled', 'expanded', 'focused', 'modal', 'multiline', 'multiselectable', 'readonly', 'required', 'selected'];
+      const booleanProperties = ['disabled', 'expanded', 'focused', 'modal', 'multiline', 'multiselectable', 'readonly', 'required', 'selected', 'busy', 'atomic'];
       const getBooleanPropertyValue = key => {
-        return properties.get(key);
+        return !!properties.get(key);
       };
       for (const booleanProperty of booleanProperties) {
         // RootWebArea's treat focus differently than other nodes. They report whether
@@ -13053,8 +13130,7 @@ var Puppeteer = function (exports, _PuppeteerURL, _LazyArg, _ARIAQueryHandler, _
         if (booleanProperty === 'focused' && _classPrivateFieldGet(_role, this) === 'RootWebArea') {
           continue;
         }
-        const value = getBooleanPropertyValue(booleanProperty);
-        if (value === undefined) {
+        if (!properties.has(booleanProperty)) {
           continue;
         }
         node[booleanProperty] = getBooleanPropertyValue(booleanProperty);
@@ -13077,7 +13153,7 @@ var Puppeteer = function (exports, _PuppeteerURL, _LazyArg, _ARIAQueryHandler, _
         }
         node[numericalProperty] = getNumericalPropertyValue(numericalProperty);
       }
-      const tokenProperties = ['autocomplete', 'haspopup', 'invalid', 'orientation'];
+      const tokenProperties = ['autocomplete', 'haspopup', 'invalid', 'orientation', 'live', 'relevant', 'errormessage', 'details'];
       const getTokenPropertyValue = key => {
         return properties.get(key);
       };
@@ -15281,7 +15357,7 @@ var Puppeteer = function (exports, _PuppeteerURL, _LazyArg, _ARIAQueryHandler, _
       name = 'Error';
       message = details.text;
     } else if ((details.exception.type !== 'object' || details.exception.subtype !== 'error') && !details.exception.objectId) {
-      return valueFromRemoteObject(details.exception);
+      return valueFromPrimitiveRemoteObject(details.exception);
     } else {
       const detail = getErrorDetails(details);
       name = detail.name;
@@ -15338,7 +15414,7 @@ var Puppeteer = function (exports, _PuppeteerURL, _LazyArg, _ARIAQueryHandler, _
       name = 'Error';
       message = details.text;
     } else if ((details.exception.type !== 'object' || details.exception.subtype !== 'error') && !details.exception.objectId) {
-      return valueFromRemoteObject(details.exception);
+      return valueFromPrimitiveRemoteObject(details.exception);
     } else {
       const detail = getErrorDetails(details);
       name = detail.name;
@@ -15364,7 +15440,34 @@ var Puppeteer = function (exports, _PuppeteerURL, _LazyArg, _ARIAQueryHandler, _
   /**
    * @internal
    */
-  function valueFromRemoteObject(remoteObject) {
+  function valueFromJSHandle(handle) {
+    const remoteObject = handle.remoteObject();
+    if (remoteObject.objectId) {
+      return valueFromRemoteObjectReference(handle);
+    } else {
+      return valueFromPrimitiveRemoteObject(remoteObject);
+    }
+  }
+  /**
+   * @internal
+   */
+  function valueFromRemoteObjectReference(handle) {
+    const remoteObject = handle.remoteObject();
+    assert(remoteObject.objectId, 'Cannot extract value when no objectId is given');
+    const description = remoteObject.description ?? '';
+    if (remoteObject.subtype === 'error' && description) {
+      const newlineIdx = description.indexOf('\n');
+      if (newlineIdx === -1) {
+        return description;
+      }
+      return description.slice(0, newlineIdx);
+    }
+    return `[${remoteObject.subtype || remoteObject.type} ${remoteObject.className}]`;
+  }
+  /**
+   * @internal
+   */
+  function valueFromPrimitiveRemoteObject(remoteObject) {
     assert(!remoteObject.objectId, 'Cannot extract value when objectId is given');
     if (remoteObject.unserializableValue) {
       if (remoteObject.type === 'bigint') {
@@ -15475,7 +15578,7 @@ var Puppeteer = function (exports, _PuppeteerURL, _LazyArg, _ARIAQueryHandler, _
     }
     async jsonValue() {
       if (!_classPrivateFieldGet(_remoteObject, this).objectId) {
-        return valueFromRemoteObject(_classPrivateFieldGet(_remoteObject, this));
+        return valueFromPrimitiveRemoteObject(_classPrivateFieldGet(_remoteObject, this));
       }
       const value = await this.evaluate(object => {
         return object;
@@ -15501,7 +15604,7 @@ var Puppeteer = function (exports, _PuppeteerURL, _LazyArg, _ARIAQueryHandler, _
     }
     toString() {
       if (!_classPrivateFieldGet(_remoteObject, this).objectId) {
-        return 'JSHandle:' + valueFromRemoteObject(_classPrivateFieldGet(_remoteObject, this));
+        return 'JSHandle:' + valueFromPrimitiveRemoteObject(_classPrivateFieldGet(_remoteObject, this));
       }
       const type = _classPrivateFieldGet(_remoteObject, this).subtype || _classPrivateFieldGet(_remoteObject, this).type;
       return 'JSHandle@' + type;
@@ -16168,7 +16271,7 @@ var Puppeteer = function (exports, _PuppeteerURL, _LazyArg, _ARIAQueryHandler, _
         throw createEvaluationError(exceptionDetails);
       }
       if (returnByValue) {
-        return valueFromRemoteObject(remoteObject);
+        return valueFromPrimitiveRemoteObject(remoteObject);
       }
       return _classPrivateFieldGet(_world3, this).createCdpHandle(remoteObject);
     }
@@ -16206,7 +16309,7 @@ var Puppeteer = function (exports, _PuppeteerURL, _LazyArg, _ARIAQueryHandler, _
       throw createEvaluationError(exceptionDetails);
     }
     if (returnByValue) {
-      return valueFromRemoteObject(remoteObject);
+      return valueFromPrimitiveRemoteObject(remoteObject);
     }
     return _classPrivateFieldGet(_world3, this).createCdpHandle(remoteObject);
     async function convertArgumentAsync(context, arg) {
@@ -17209,7 +17312,15 @@ var Puppeteer = function (exports, _PuppeteerURL, _LazyArg, _ARIAQueryHandler, _
       _classPrivateFieldSet(_url4, this, data.request.url + (data.request.urlFragment ?? ''));
       _classPrivateFieldSet(_resourceType, this, (data.type || 'other').toLowerCase());
       _classPrivateFieldSet(_method, this, data.request.method);
-      _classPrivateFieldSet(_postData, this, data.request.postData);
+      if (data.request.postDataEntries && data.request.postDataEntries.length > 0) {
+        _classPrivateFieldSet(_postData, this, new TextDecoder().decode(mergeUint8Arrays(data.request.postDataEntries.map(entry => {
+          return entry.bytes ? stringToTypedArray(entry.bytes, true) : null;
+        }).filter(entry => {
+          return entry !== null;
+        }))));
+      } else {
+        _classPrivateFieldSet(_postData, this, data.request.postData);
+      }
       _classPrivateFieldSet(_hasPostData, this, data.request.hasPostData ?? false);
       _classPrivateFieldSet(_frame4, this, frame);
       this._redirectChain = redirectChain;
@@ -20912,6 +21023,19 @@ var Puppeteer = function (exports, _PuppeteerURL, _LazyArg, _ARIAQueryHandler, _
   /**
    * @internal
    */
+  function convertSameSiteFromPuppeteerToCdp(sameSite) {
+    switch (sameSite) {
+      case 'Strict':
+      case 'Lax':
+      case 'None':
+        return sameSite;
+      default:
+        return undefined;
+    }
+  }
+  /**
+   * @internal
+   */
   var _closed2 = /*#__PURE__*/new WeakMap();
   var _targetManager = /*#__PURE__*/new WeakMap();
   var _cdpBluetoothEmulation = /*#__PURE__*/new WeakMap();
@@ -21264,7 +21388,8 @@ var Puppeteer = function (exports, _PuppeteerURL, _LazyArg, _ARIAQueryHandler, _
           cookies: items.map(cookieParam => {
             return {
               ...cookieParam,
-              partitionKey: convertCookiesPartitionKeyFromPuppeteerToCdp(cookieParam.partitionKey)
+              partitionKey: convertCookiesPartitionKeyFromPuppeteerToCdp(cookieParam.partitionKey),
+              sameSite: convertSameSiteFromPuppeteerToCdp(cookieParam.sameSite)
             };
           })
         });
@@ -21320,6 +21445,33 @@ var Puppeteer = function (exports, _PuppeteerURL, _LazyArg, _ARIAQueryHandler, _
     async metrics() {
       const response = await _classPrivateFieldGet(_primaryTargetClient, this).send('Performance.getMetrics');
       return _assertClassBrand(_CdpPage_brand, this, _buildMetricsObject).call(this, response.metrics);
+    }
+    async captureHeapSnapshot(options) {
+      const {
+        createWriteStream
+      } = environment.value.fs;
+      const stream = createWriteStream(options.path);
+      const streamPromise = new Promise((resolve, reject) => {
+        stream.on('error', reject);
+        stream.on('finish', resolve);
+      });
+      const client = _classPrivateFieldGet(_primaryTargetClient, this);
+      await client.send('HeapProfiler.enable');
+      await client.send('HeapProfiler.collectGarbage');
+      const handler = event => {
+        stream.write(event.chunk);
+      };
+      client.on('HeapProfiler.addHeapSnapshotChunk', handler);
+      try {
+        await client.send('HeapProfiler.takeHeapSnapshot', {
+          reportProgress: false
+        });
+      } finally {
+        client.off('HeapProfiler.addHeapSnapshotChunk', handler);
+        await client.send('HeapProfiler.disable');
+      }
+      stream.end();
+      await streamPromise;
     }
     async reload(options) {
       const [result] = await Promise.all([this.waitForNavigation({
@@ -21741,12 +21893,7 @@ var Puppeteer = function (exports, _PuppeteerURL, _LazyArg, _ARIAQueryHandler, _
     // eslint-disable-next-line max-len -- The comment is long.
     // eslint-disable-next-line @puppeteer/use-using -- These are not owned by this function.
     for (const arg of values) {
-      const remoteObject = arg.remoteObject();
-      if (remoteObject.objectId) {
-        textTokens.push(arg.toString());
-      } else {
-        textTokens.push(valueFromRemoteObject(remoteObject));
-      }
+      textTokens.push(valueFromJSHandle(arg));
     }
     const stackTraceLocations = [];
     if (event.stackTrace) {
@@ -21957,6 +22104,23 @@ var Puppeteer = function (exports, _PuppeteerURL, _LazyArg, _ARIAQueryHandler, _
         permissions: protocolPermissions
       });
     }
+    async setPermission(origin, ...permissions) {
+      await Promise.all(permissions.map(async permission => {
+        const protocolPermission = {
+          name: permission.permission.name,
+          userVisibleOnly: permission.permission.userVisibleOnly,
+          sysex: permission.permission.sysex,
+          allowWithoutSanitization: permission.permission.allowWithoutSanitization,
+          panTiltZoom: permission.permission.panTiltZoom
+        };
+        await _classPrivateFieldGet(_connection3, this).send('Browser.setPermission', {
+          origin: origin === '*' ? undefined : origin,
+          browserContextId: _classPrivateFieldGet(_id7, this) || undefined,
+          permission: protocolPermission,
+          setting: permission.state
+        });
+      }));
+    }
     async clearPermissionOverrides() {
       await _classPrivateFieldGet(_connection3, this).send('Browser.resetPermissions', {
         browserContextId: _classPrivateFieldGet(_id7, this) || undefined
@@ -22009,7 +22173,8 @@ var Puppeteer = function (exports, _PuppeteerURL, _LazyArg, _ARIAQueryHandler, _
         cookies: cookies.map(cookie => {
           return {
             ...cookie,
-            partitionKey: convertCookiesPartitionKeyFromPuppeteerToCdp(cookie.partitionKey)
+            partitionKey: convertCookiesPartitionKeyFromPuppeteerToCdp(cookie.partitionKey),
+            sameSite: convertSameSiteFromPuppeteerToCdp(cookie.sameSite)
           };
         })
       });
@@ -25080,9 +25245,9 @@ var Puppeteer = function (exports, _PuppeteerURL, _LazyArg, _ARIAQueryHandler, _
    * @internal
    */
   const PUPPETEER_REVISIONS = Object.freeze({
-    chrome: '144.0.7559.96',
-    'chrome-headless-shell': '144.0.7559.96',
-    firefox: 'stable_147.0.1'
+    chrome: '145.0.7632.46',
+    'chrome-headless-shell': '145.0.7632.46',
+    firefox: 'stable_147.0.3'
   });
 
   /**
@@ -25228,6 +25393,7 @@ var Puppeteer = function (exports, _PuppeteerURL, _LazyArg, _ARIAQueryHandler, _
   exports.bindIsolatedHandle = bindIsolatedHandle;
   exports.connect = connect;
   exports.convertCookiesPartitionKeyFromPuppeteerToCdp = convertCookiesPartitionKeyFromPuppeteerToCdp;
+  exports.convertSameSiteFromPuppeteerToCdp = convertSameSiteFromPuppeteerToCdp;
   exports.createClientError = createClientError;
   exports.createEvaluationError = createEvaluationError;
   exports.createIncrementalIdGenerator = createIncrementalIdGenerator;
@@ -25274,7 +25440,9 @@ var Puppeteer = function (exports, _PuppeteerURL, _LazyArg, _ARIAQueryHandler, _
   exports.transposeIterableHandle = transposeIterableHandle;
   exports.unitToPixels = unitToPixels;
   exports.validateDialogType = validateDialogType;
-  exports.valueFromRemoteObject = valueFromRemoteObject;
+  exports.valueFromJSHandle = valueFromJSHandle;
+  exports.valueFromPrimitiveRemoteObject = valueFromPrimitiveRemoteObject;
+  exports.valueFromRemoteObjectReference = valueFromRemoteObjectReference;
   exports.withSourcePuppeteerURLIfNone = withSourcePuppeteerURLIfNone;
   Object.defineProperty(exports, '__esModule', {
     value: true

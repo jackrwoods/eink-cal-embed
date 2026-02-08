@@ -18,6 +18,7 @@ import type {HTTPResponse} from '../api/HTTPResponse.js';
 import type {
   Credentials,
   GeolocationOptions,
+  HeapSnapshotOptions,
   MediaFeature,
   PageEvents,
   ReloadOptions,
@@ -227,8 +228,8 @@ export class BidiPage extends Page {
     throw new UnsupportedOperation();
   }
 
-  override windowId(): Promise<WindowId> {
-    throw new UnsupportedOperation();
+  override async windowId(): Promise<WindowId> {
+    return this.#frame.browsingContext.windowId;
   }
 
   override openDevTools(): Promise<Page> {
@@ -952,6 +953,12 @@ export class BidiPage extends Page {
     throw new UnsupportedOperation();
   }
 
+  override async captureHeapSnapshot(
+    _options: HeapSnapshotOptions,
+  ): Promise<void> {
+    throw new UnsupportedOperation();
+  }
+
   override async goBack(
     options: WaitForOptions = {},
   ): Promise<HTTPResponse | null> {
@@ -1153,17 +1160,31 @@ export function cdpSpecificCookiePropertiesFromPuppeteerToBidi(
 function convertCookiesSameSiteBiDiToCdp(
   sameSite: Bidi.Network.SameSite | undefined,
 ): CookieSameSite {
-  return sameSite === 'strict' ? 'Strict' : sameSite === 'lax' ? 'Lax' : 'None';
+  switch (sameSite) {
+    case 'strict':
+      return 'Strict';
+    case 'lax':
+      return 'Lax';
+    case 'none':
+      return 'None';
+    default:
+      return 'Default';
+  }
 }
 
 export function convertCookiesSameSiteCdpToBiDi(
   sameSite: CookieSameSite | undefined,
 ): Bidi.Network.SameSite {
-  return sameSite === 'Strict'
-    ? Bidi.Network.SameSite.Strict
-    : sameSite === 'Lax'
-      ? Bidi.Network.SameSite.Lax
-      : Bidi.Network.SameSite.None;
+  switch (sameSite) {
+    case 'Strict':
+      return Bidi.Network.SameSite.Strict;
+    case 'Lax':
+      return Bidi.Network.SameSite.Lax;
+    case 'None':
+      return Bidi.Network.SameSite.None;
+    default:
+      return Bidi.Network.SameSite.Default;
+  }
 }
 
 export function convertCookiesExpiryCdpToBiDi(

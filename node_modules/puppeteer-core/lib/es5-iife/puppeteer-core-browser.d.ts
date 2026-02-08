@@ -478,6 +478,26 @@ export declare abstract class Browser extends EventEmitter<BrowserEvents> {
      */
     deleteMatchingCookies(...filters: DeleteCookiesRequest[]): Promise<void>;
     /**
+     * Sets the permission for a specific origin in the default
+     * {@link BrowserContext}.
+     *
+     * @remarks
+     *
+     * Shortcut for
+     * {@link BrowserContext.setPermission |
+     * browser.defaultBrowserContext().setPermission()}.
+     *
+     * @param origin - The origin to set the permission for.
+     * @param permission - The permission descriptor.
+     * @param state - The state of the permission.
+     *
+     * @public
+     */
+    setPermission(origin: string, ...permissions: Array<{
+        permission: PermissionDescriptor_2;
+        state: PermissionState_2;
+    }>): Promise<void>;
+    /**
      * Installs an extension and returns the ID. In Chrome, this is only
      * available if the browser was created using `pipe: true` and the
      * `--enable-unsafe-extension-debugging` flag is set.
@@ -628,8 +648,23 @@ export declare abstract class BrowserContext extends EventEmitter<BrowserContext
      * "https://example.com".
      * @param permissions - An array of permissions to grant. All permissions that
      * are not listed here will be automatically denied.
+     *
+     * @deprecated in favor of {@link BrowserContext.setPermission}.
      */
     abstract overridePermissions(origin: string, permissions: Permission[]): Promise<void>;
+    /**
+     * Sets the permission for a specific origin.
+     *
+     * @param origin - The origin to set the permission for.
+     * @param permission - The permission descriptor.
+     * @param state - The state of the permission.
+     *
+     * @public
+     */
+    abstract setPermission(origin: string | '*', ...permissions: Array<{
+        permission: PermissionDescriptor_2;
+        state: PermissionState_2;
+    }>): Promise<void>;
     /**
      * Clears all permission overrides for this
      * {@link BrowserContext | browser context}.
@@ -1534,7 +1569,7 @@ export declare type CookiePriority = 'Low' | 'Medium' | 'High';
  *
  * @public
  */
-export declare type CookieSameSite = 'Strict' | 'Lax' | 'None';
+export declare type CookieSameSite = 'Strict' | 'Lax' | 'None' | 'Default';
 
 /**
  * Represents the source scheme of the origin that originally set the cookie. A value of
@@ -3048,7 +3083,7 @@ export declare abstract class Frame extends EventEmitter<FrameEvents> {
      * ```
      *
      * @param pageFunction - the function to evaluate in the frame context.
-     * @param options - options to configure the polling method and timeout.
+     * @param options - options to configure the polling method, timeout and signal.
      * @param args - arguments to pass to the `pageFunction`.
      * @returns the promise which resolve when the `pageFunction` returns a truthy value.
      */
@@ -3358,6 +3393,18 @@ export declare type HandleOr<T> = HandleFor<T> | JSHandle<T> | T;
  * @public
  */
 export declare type Handler<T = unknown> = (event: T) => void;
+
+/**
+ * Options for {@link Page.captureHeapSnapshot}.
+ *
+ * @public
+ */
+export declare interface HeapSnapshotOptions {
+    /**
+     * The file path to save the heap snapshot to.
+     */
+    path: string;
+}
 
 /**
  * Represents an HTTP request sent by a page.
@@ -4259,6 +4306,10 @@ export declare interface LaunchOptions extends ConnectOptions {
      * Additional command line arguments to pass to the browser instance.
      */
     args?: string[];
+    /**
+     * If provided, the browser will be closed when the signal is aborted.
+     */
+    signal?: AbortSignal;
 }
 
 /**
@@ -4373,7 +4424,7 @@ export declare abstract class Locator<T> extends EventEmitter<LocatorEvents> {
      * method is chosen based on the type. `contenteditable`, select, textarea and
      * input elements are supported.
      */
-    fill<ElementType extends Element>(this: Locator<ElementType>, value: string, options?: Readonly<ActionOptions>): Promise<void>;
+    fill<ElementType extends Element>(this: Locator<ElementType>, value: string, options?: Readonly<LocatorFillOptions>): Promise<void>;
     /**
      * Hovers over the located element.
      */
@@ -4406,6 +4457,19 @@ export declare enum LocatorEvent {
  */
 export declare interface LocatorEvents extends Record<EventType, unknown> {
     [LocatorEvent.Action]: undefined;
+}
+
+/**
+ * @public
+ */
+export declare interface LocatorFillOptions extends ActionOptions {
+    /**
+     * The number of characters to type before switching to a faster fill-out
+     * method.
+     *
+     * @defaultValue `100`
+     */
+    typingThreshold?: number;
 }
 
 /**
@@ -5590,6 +5654,10 @@ export declare abstract class Page extends EventEmitter<PageEvents> {
      */
     abstract metrics(): Promise<Metrics>;
     /**
+     * Captures a snapshot of the JavaScript heap and writes it to a file.
+     */
+    abstract captureHeapSnapshot(options: HeapSnapshotOptions): Promise<void>;
+    /**
      * The page's URL.
      *
      * @remarks
@@ -5672,6 +5740,8 @@ export declare abstract class Page extends EventEmitter<PageEvents> {
      * - `timeout`: Maximum wait time in milliseconds, defaults to `30` seconds, pass
      *   `0` to disable the timeout. The default value can be changed by using the
      *   {@link Page.setDefaultTimeout} method.
+     *
+     * - `signal`: A signal object that allows you to cancel a waitForRequest call.
      */
     waitForRequest(urlOrPredicate: string | AwaitablePredicate<HTTPRequest>, options?: WaitTimeoutOptions): Promise<HTTPRequest>;
     /**
@@ -5700,6 +5770,8 @@ export declare abstract class Page extends EventEmitter<PageEvents> {
      * - `timeout`: Maximum wait time in milliseconds, defaults to `30` seconds,
      *   pass `0` to disable the timeout. The default value can be changed by using
      *   the {@link Page.setDefaultTimeout} method.
+     *
+     * - `signal`: A signal object that allows you to cancel a waitForResponse call.
      */
     waitForResponse(urlOrPredicate: string | AwaitablePredicate<HTTPResponse>, options?: WaitTimeoutOptions): Promise<HTTPResponse>;
     /**
@@ -6459,6 +6531,8 @@ export declare abstract class Page extends EventEmitter<PageEvents> {
      * - `timeout`: maximum time to wait for in milliseconds. Defaults to `30000`
      *   (30 seconds). Pass `0` to disable timeout. The default value can be changed
      *   by using the {@link Page.setDefaultTimeout} method.
+     *
+     * - `signal`: A signal object that allows you to cancel a waitForSelector call.
      */
     waitForSelector<Selector extends string>(selector: Selector, options?: WaitForSelectorOptions): Promise<ElementHandle<NodeFor<Selector>> | null>;
     /**
@@ -6929,8 +7003,27 @@ export declare interface PDFOptions {
 
 /**
  * @public
+ * @deprecated in favor of {@link PermissionDescriptor}.
  */
 export declare type Permission = 'accelerometer' | 'ambient-light-sensor' | 'background-sync' | 'camera' | 'clipboard-read' | 'clipboard-sanitized-write' | 'clipboard-write' | 'geolocation' | 'gyroscope' | 'idle-detection' | 'keyboard-lock' | 'magnetometer' | 'microphone' | 'midi-sysex' | 'midi' | 'notifications' | 'payment-handler' | 'persistent-storage' | 'pointer-lock';
+
+/**
+ * @public
+ */
+declare interface PermissionDescriptor_2 {
+    name: string;
+    userVisibleOnly?: boolean;
+    sysex?: boolean;
+    panTiltZoom?: boolean;
+    allowWithoutSanitization?: boolean;
+}
+export { PermissionDescriptor_2 as PermissionDescriptor }
+
+/**
+ * @public
+ */
+declare type PermissionState_2 = 'granted' | 'denied' | 'prompt';
+export { PermissionState_2 as PermissionState }
 
 /**
  * @public
@@ -7107,6 +7200,8 @@ declare namespace Puppeteer_2 {
         BrowserContextOptions,
         TargetFilterCallback,
         Permission,
+        PermissionDescriptor_2 as PermissionDescriptor,
+        PermissionState_2 as PermissionState,
         WaitForTargetOptions,
         BrowserEvent,
         BrowserEvents,
@@ -7188,6 +7283,7 @@ declare namespace Puppeteer_2 {
         PageEvents,
         NewDocumentScriptEvaluation,
         ReloadOptions,
+        HeapSnapshotOptions,
         Page,
         TargetType,
         Target,
@@ -7195,6 +7291,7 @@ declare namespace Puppeteer_2 {
         VisibilityOption,
         ActionOptions,
         LocatorClickOptions,
+        LocatorFillOptions,
         LocatorScrollOptions,
         LocatorEvent,
         LocatorEvents,
@@ -7842,6 +7939,35 @@ export declare interface SerializedAXNode {
      */
     invalid?: string;
     orientation?: string;
+    /**
+     * Whether the node is {@link https://www.w3.org/TR/wai-aria/#aria-busy | busy}.
+     */
+    busy?: boolean;
+    /**
+     * The {@link https://www.w3.org/TR/wai-aria/#aria-live | live} status of the
+     * node.
+     */
+    live?: string;
+    /**
+     * Whether the live region is
+     * {@link https://www.w3.org/TR/wai-aria/#aria-atomic | atomic}.
+     */
+    atomic?: boolean;
+    /**
+     * The {@link https://www.w3.org/TR/wai-aria/#aria-relevant | relevant}
+     * changes for the live region.
+     */
+    relevant?: string;
+    /**
+     * The {@link https://www.w3.org/TR/wai-aria/#aria-errormessage | error message}
+     * for the node.
+     */
+    errormessage?: string;
+    /**
+     * The {@link https://www.w3.org/TR/wai-aria/#aria-details | details} for the
+     * node.
+     */
+    details?: string;
     /**
      * Url for link elements.
      */

@@ -127,8 +127,8 @@ let BrowsingContext = (() => {
             __esDecorate(this, null, _locateNodes_decorators, { kind: "method", name: "locateNodes", static: false, private: false, access: { has: obj => "locateNodes" in obj, get: obj => obj.locateNodes }, metadata: _metadata }, null, _instanceExtraInitializers);
             if (_metadata) Object.defineProperty(this, Symbol.metadata, { enumerable: true, configurable: true, writable: true, value: _metadata });
         }
-        static from(userContext, parent, id, url, originalOpener) {
-            const browsingContext = new BrowsingContext(userContext, parent, id, url, originalOpener);
+        static from(userContext, parent, id, url, originalOpener, clientWindow) {
+            const browsingContext = new BrowsingContext(userContext, parent, id, url, originalOpener, clientWindow);
             browsingContext.#initialize();
             return browsingContext;
         }
@@ -146,16 +146,18 @@ let BrowsingContext = (() => {
         parent;
         userContext;
         originalOpener;
+        windowId;
         #emulationState = { javaScriptEnabled: true };
         #bluetoothEmulation;
         #deviceRequestPromptManager;
-        constructor(userContext, parent, id, url, originalOpener) {
+        constructor(userContext, parent, id, url, originalOpener, clientWindow) {
             super();
             this.#url = url;
             this.id = id;
             this.parent = parent;
             this.userContext = userContext;
             this.originalOpener = originalOpener;
+            this.windowId = clientWindow;
             this.defaultRealm = this.#createWindowRealm();
             this.#bluetoothEmulation = new BluetoothEmulation_js_1.BidiBluetoothEmulation(this.id, this.#session);
             this.#deviceRequestPromptManager = new DeviceRequestPrompt_js_1.BidiDeviceRequestPromptManager(this.id, this.#session);
@@ -176,7 +178,7 @@ let BrowsingContext = (() => {
                 if (info.parent !== this.id) {
                     return;
                 }
-                const browsingContext = BrowsingContext.from(this.userContext, this, info.context, info.url, info.originalOpener);
+                const browsingContext = BrowsingContext.from(this.userContext, this, info.context, info.url, info.originalOpener, info.clientWindow);
                 this.#children.set(info.context, browsingContext);
                 const browsingContextEmitter = this.#disposables.use(new EventEmitter_js_1.EventEmitter(browsingContext));
                 browsingContextEmitter.once('closed', () => {
@@ -562,12 +564,14 @@ let BrowsingContext = (() => {
                 });
             }));
         }
-        async locateNodes(locator, startNodes) {
+        async locateNodes(locator, startNodes = []) {
             // TODO: add other locateNodes options if needed.
             const result = await this.#session.send('browsingContext.locateNodes', {
                 context: this.id,
                 locator,
-                startNodes: startNodes.length ? startNodes : undefined,
+                startNodes: startNodes.length
+                    ? startNodes
+                    : undefined,
             });
             return result.result.nodes;
         }

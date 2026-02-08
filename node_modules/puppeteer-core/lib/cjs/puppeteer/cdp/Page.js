@@ -58,6 +58,7 @@ var __disposeResources = (this && this.__disposeResources) || (function (Suppres
 });
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.CdpPage = void 0;
+exports.convertSameSiteFromPuppeteerToCdp = convertSameSiteFromPuppeteerToCdp;
 exports.convertCookiesPartitionKeyFromPuppeteerToCdp = convertCookiesPartitionKeyFromPuppeteerToCdp;
 const rxjs_js_1 = require("../../third_party/rxjs/rxjs.js");
 const CDPSession_js_1 = require("../api/CDPSession.js");
@@ -68,6 +69,7 @@ const EventEmitter_js_1 = require("../common/EventEmitter.js");
 const FileChooser_js_1 = require("../common/FileChooser.js");
 const NetworkManagerEvents_js_1 = require("../common/NetworkManagerEvents.js");
 const util_js_1 = require("../common/util.js");
+const environment_js_1 = require("../environment.js");
 const assert_js_1 = require("../util/assert.js");
 const Deferred_js_1 = require("../util/Deferred.js");
 const disposable_js_1 = require("../util/disposable.js");
@@ -93,6 +95,19 @@ function convertConsoleMessageLevel(method) {
             return 'warn';
         default:
             return method;
+    }
+}
+/**
+ * @internal
+ */
+function convertSameSiteFromPuppeteerToCdp(sameSite) {
+    switch (sameSite) {
+        case 'Strict':
+        case 'Lax':
+        case 'None':
+            return sameSite;
+        default:
+            return undefined;
     }
 }
 /**
@@ -551,6 +566,7 @@ class CdpPage extends Page_js_1.Page {
                     return {
                         ...cookieParam,
                         partitionKey: convertCookiesPartitionKeyFromPuppeteerToCdp(cookieParam.partitionKey),
+                        sameSite: convertSameSiteFromPuppeteerToCdp(cookieParam.sameSite),
                     };
                 }),
             });
@@ -612,6 +628,32 @@ class CdpPage extends Page_js_1.Page {
         const response = await this.#primaryTargetClient.send('Performance.getMetrics');
         return this.#buildMetricsObject(response.metrics);
     }
+    async captureHeapSnapshot(options) {
+        const { createWriteStream } = environment_js_1.environment.value.fs;
+        const stream = createWriteStream(options.path);
+        const streamPromise = new Promise((resolve, reject) => {
+            stream.on('error', reject);
+            stream.on('finish', resolve);
+        });
+        const client = this.#primaryTargetClient;
+        await client.send('HeapProfiler.enable');
+        await client.send('HeapProfiler.collectGarbage');
+        const handler = (event) => {
+            stream.write(event.chunk);
+        };
+        client.on('HeapProfiler.addHeapSnapshotChunk', handler);
+        try {
+            await client.send('HeapProfiler.takeHeapSnapshot', {
+                reportProgress: false,
+            });
+        }
+        finally {
+            client.off('HeapProfiler.addHeapSnapshotChunk', handler);
+            await client.send('HeapProfiler.disable');
+        }
+        stream.end();
+        await streamPromise;
+    }
     #emitMetrics(event) {
         this.emit("metrics" /* PageEvent.Metrics */, {
             title: event.title,
@@ -644,13 +686,7 @@ class CdpPage extends Page_js_1.Page {
         // eslint-disable-next-line max-len -- The comment is long.
         // eslint-disable-next-line @puppeteer/use-using -- These are not owned by this function.
         for (const arg of values) {
-            const remoteObject = arg.remoteObject();
-            if (remoteObject.objectId) {
-                textTokens.push(arg.toString());
-            }
-            else {
-                textTokens.push((0, utils_js_1.valueFromRemoteObject)(remoteObject));
-            }
+            textTokens.push((0, utils_js_1.valueFromJSHandle)(arg));
         }
         const stackTraceLocations = [];
         if (event.stackTrace) {

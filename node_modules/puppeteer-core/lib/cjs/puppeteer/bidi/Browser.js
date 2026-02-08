@@ -46,7 +46,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.BidiBrowser = void 0;
 const Browser_js_1 = require("../api/Browser.js");
 const Errors_js_1 = require("../common/Errors.js");
-const Errors_js_2 = require("../common/Errors.js");
 const EventEmitter_js_1 = require("../common/EventEmitter.js");
 const util_js_1 = require("../common/util.js");
 const decorators_js_1 = require("../util/decorators.js");
@@ -262,19 +261,44 @@ let BidiBrowser = (() => {
             await this.#browserCore.uninstallExtension(id);
         }
         screens() {
-            throw new Errors_js_2.UnsupportedOperation();
+            throw new Errors_js_1.UnsupportedOperation();
         }
         addScreen(_params) {
-            throw new Errors_js_2.UnsupportedOperation();
+            throw new Errors_js_1.UnsupportedOperation();
         }
         removeScreen(_screenId) {
-            throw new Errors_js_2.UnsupportedOperation();
+            throw new Errors_js_1.UnsupportedOperation();
         }
-        getWindowBounds(_windowId) {
-            throw new Errors_js_2.UnsupportedOperation();
+        async getWindowBounds(windowId) {
+            const clientWindowInfo = await this.#browserCore.getClientWindowInfo(windowId);
+            return {
+                left: clientWindowInfo.x,
+                top: clientWindowInfo.y,
+                width: clientWindowInfo.width,
+                height: clientWindowInfo.height,
+                windowState: clientWindowInfo.state,
+            };
         }
-        setWindowBounds(_windowId, _windowBounds) {
-            throw new Errors_js_2.UnsupportedOperation();
+        async setWindowBounds(windowId, windowBounds) {
+            let params;
+            const windowState = windowBounds.windowState ?? 'normal';
+            if (windowState === 'normal') {
+                params = {
+                    clientWindow: windowId,
+                    state: 'normal',
+                    x: windowBounds.left,
+                    y: windowBounds.top,
+                    width: windowBounds.width,
+                    height: windowBounds.height,
+                };
+            }
+            else {
+                params = {
+                    clientWindow: windowId,
+                    state: windowState,
+                };
+            }
+            await this.#browserCore.setClientWindowState(params);
         }
         targets() {
             return [

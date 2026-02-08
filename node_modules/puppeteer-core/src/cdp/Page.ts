@@ -16,7 +16,11 @@ import type {ElementHandle} from '../api/ElementHandle.js';
 import type {Frame, WaitForOptions} from '../api/Frame.js';
 import type {HTTPResponse} from '../api/HTTPResponse.js';
 import type {JSHandle} from '../api/JSHandle.js';
-import type {Credentials, ReloadOptions} from '../api/Page.js';
+import type {
+  Credentials,
+  HeapSnapshotOptions,
+  ReloadOptions,
+} from '../api/Page.js';
 import {
   Page,
   PageEvent,
@@ -37,6 +41,7 @@ import type {
   DeleteCookiesRequest,
   CookieParam,
   CookiePartitionKey,
+  CookieSameSite,
 } from '../common/Cookie.js';
 import {TargetCloseError} from '../common/Errors.js';
 import {EventEmitter} from '../common/EventEmitter.js';
@@ -54,6 +59,7 @@ import {
   validateDialogType,
 } from '../common/util.js';
 import type {Viewport} from '../common/Viewport.js';
+import {environment} from '../environment.js';
 import {assert} from '../util/assert.js';
 import {Deferred} from '../util/Deferred.js';
 import {AsyncDisposableStack} from '../util/disposable.js';
@@ -82,7 +88,7 @@ import {Tracing} from './Tracing.js';
 import {
   createClientError,
   pageBindingInitString,
-  valueFromRemoteObject,
+  valueFromJSHandle,
 } from './utils.js';
 import {CdpWebWorker} from './WebWorker.js';
 
@@ -92,6 +98,22 @@ function convertConsoleMessageLevel(method: string): ConsoleMessageType {
       return 'warn';
     default:
       return method as ConsoleMessageType;
+  }
+}
+
+/**
+ * @internal
+ */
+export function convertSameSiteFromPuppeteerToCdp(
+  sameSite: CookieSameSite | undefined,
+): Protocol.Network.CookieSameSite | undefined {
+  switch (sameSite) {
+    case 'Strict':
+    case 'Lax':
+    case 'None':
+      return sameSite;
+    default:
+      return undefined;
   }
 }
 
@@ -712,6 +734,7 @@ export class CdpPage extends Page {
             partitionKey: convertCookiesPartitionKeyFromPuppeteerToCdp(
               cookieParam.partitionKey,
             ),
+            sameSite: convertSameSiteFromPuppeteerToCdp(cookieParam.sameSite),
           };
         }),
       });
@@ -812,6 +835,40 @@ export class CdpPage extends Page {
     return this.#buildMetricsObject(response.metrics);
   }
 
+  override async captureHeapSnapshot(
+    options: HeapSnapshotOptions,
+  ): Promise<void> {
+    const {createWriteStream} = environment.value.fs;
+    const stream = createWriteStream(options.path);
+    const streamPromise = new Promise<void>((resolve, reject) => {
+      stream.on('error', reject);
+      stream.on('finish', resolve);
+    });
+
+    const client = this.#primaryTargetClient;
+    await client.send('HeapProfiler.enable');
+    await client.send('HeapProfiler.collectGarbage');
+
+    const handler = (
+      event: Protocol.HeapProfiler.AddHeapSnapshotChunkEvent,
+    ) => {
+      stream.write(event.chunk);
+    };
+    client.on('HeapProfiler.addHeapSnapshotChunk', handler);
+
+    try {
+      await client.send('HeapProfiler.takeHeapSnapshot', {
+        reportProgress: false,
+      });
+    } finally {
+      client.off('HeapProfiler.addHeapSnapshotChunk', handler);
+      await client.send('HeapProfiler.disable');
+    }
+
+    stream.end();
+    await streamPromise;
+  }
+
   #emitMetrics(event: Protocol.Performance.MetricsEvent): void {
     this.emit(PageEvent.Metrics, {
       title: event.title,
@@ -857,12 +914,7 @@ export class CdpPage extends Page {
     // eslint-disable-next-line max-len -- The comment is long.
     // eslint-disable-next-line @puppeteer/use-using -- These are not owned by this function.
     for (const arg of values) {
-      const remoteObject = arg.remoteObject();
-      if (remoteObject.objectId) {
-        textTokens.push(arg.toString());
-      } else {
-        textTokens.push(valueFromRemoteObject(remoteObject));
-      }
+      textTokens.push(valueFromJSHandle(arg));
     }
     const stackTraceLocations = [];
     if (event.stackTrace) {
