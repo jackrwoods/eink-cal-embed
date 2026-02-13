@@ -2990,9 +2990,11 @@ var Puppeteer = function (exports, _PuppeteerURL, _LazyArg, _ARIAQueryHandler, _
    */
   function stringToTypedArray(string, base64Encoded = false) {
     if (base64Encoded) {
-      // TODO: use
-      // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Uint8Array/fromBase64
-      // once available.
+      if ('fromBase64' in Uint8Array) {
+        // @ts-expect-error fromBase64 is newer than the types we use.
+        return Uint8Array.fromBase64(string);
+      }
+      // TODO: remove Buffer in v26 when it becomes LTS.
       if (typeof Buffer === 'function') {
         return Buffer.from(string, 'base64');
       }
@@ -3048,7 +3050,7 @@ var Puppeteer = function (exports, _PuppeteerURL, _LazyArg, _ARIAQueryHandler, _
    */
   // If moved update release-please config
   // x-release-please-start-version
-  const packageVersion = '24.37.2';
+  const packageVersion = '24.37.3';
   // x-release-please-end
 
   /**
@@ -25245,8 +25247,8 @@ var Puppeteer = function (exports, _PuppeteerURL, _LazyArg, _ARIAQueryHandler, _
    * @internal
    */
   const PUPPETEER_REVISIONS = Object.freeze({
-    chrome: '145.0.7632.46',
-    'chrome-headless-shell': '145.0.7632.46',
+    chrome: '145.0.7632.67',
+    'chrome-headless-shell': '145.0.7632.67',
     firefox: 'stable_147.0.3'
   });
 
